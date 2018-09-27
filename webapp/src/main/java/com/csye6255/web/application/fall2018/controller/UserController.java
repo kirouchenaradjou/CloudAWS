@@ -11,8 +11,10 @@ import com.google.gson.JsonObject;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Base64;
 import java.util.Date;
 import java.util.List;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -163,17 +165,40 @@ public class UserController {
     }
     @RequestMapping(value = "/time", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
-    public String checkSession(@RequestHeader HttpHeaders headers)
+    public String checkSession(@RequestHeader HttpHeaders headers, HttpServletRequest request)
     {
         JsonObject jsonObject = new JsonObject();
-        if(headers !=null && headers.get("Authorization") !=null)
-            jsonObject.addProperty("message","Current Time is "+ new Date().toString());
+        final String authorization = request.getHeader("Authorization");
+        if (authorization != null && authorization.toLowerCase().startsWith("basic")) {
+            // Authorization: Basic base64credentials
+            String base64Credentials = authorization.substring("Basic".length()).trim();
+            byte[] credDecoded = Base64.getDecoder().decode(base64Credentials);
+            String credentials = new String(credDecoded, StandardCharsets.UTF_8);
+            // credentials = username:password
+            final String[] values = credentials.split(":", 2);
+            String userName = values[0];
+            String password = values[1];
+            BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+            List<User> userList = userDao.findByUserName(userName);
+
+
+            if (userList.size() != 0) {
+                User user = userList.get(0);
+                if (encoder.matches(password, user.getPassword())) {
+                    jsonObject.addProperty("message", "Current Time is : "+ new Date().toString());
+                } else jsonObject.addProperty("message", "Incorrect Password");
+
+
+            } else jsonObject.addProperty("message", "User not found! - Try Logging in again");
+
+        }
 
         else
             jsonObject.addProperty("message","You are not logged in!");
 
 
         return jsonObject.toString();
+
     }
 
 }
