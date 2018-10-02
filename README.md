@@ -29,7 +29,6 @@ method : post
 "password" : "user"}
 
 Response :
-
 {
 "message": "Registration Successful"
 }
@@ -41,7 +40,6 @@ method : post
 "password" : "user"}
 
 Response :
-
 {
 "message": "User already exists!"
 }
