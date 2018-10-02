@@ -37,6 +37,7 @@
       "Properties" : {
         "GroupName" : "csye6225-webapp",
         "GroupDescription" : "Access to ports 22, 80 & 443",
+	"VpcId":{"Ref":"ourVPC"},
         "SecurityGroupIngress" : [ {
           "IpProtocol" : "tcp",
           "FromPort" : "22",
