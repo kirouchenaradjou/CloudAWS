@@ -3,6 +3,9 @@ VPC_NAME=${STACK_NAME}-csye6225-vpc
 SUBNET1_NAME=${STACK_NAME}-csye6225-subnet1
 SUBNET2_NAME=${STACK_NAME}-csye6225-subnet2
 SUBNET3_NAME=${STACK_NAME}-csye6225-subnet3
+SUBNET4_NAME=${STACK_NAME}-csye6225-subnet4
+SUBNET5_NAME=${STACK_NAME}-csye6225-subnet5
+SUBNET6_NAME=${STACK_NAME}-csye6225-subnet6
 IG_NAME=${STACK_NAME}-csye6225-InternetGateway
 ROUTE_TABLE_NAME=${STACK_NAME}-csye6225-public-route-table
 
@@ -10,6 +13,9 @@ export VPC_ID=$(aws ec2 describe-vpcs --query 'Vpcs[*].[VpcId, Tags[0].Value]' -
 export SUBNET1_ID=$(aws ec2 describe-subnets --filters Name=tag:Name,Values=$SUBNET1_NAME --output text | awk '{print $9}')
 export SUBNET2_ID=$(aws ec2 describe-subnets --filters Name=tag:Name,Values=$SUBNET2_NAME --output text | awk '{print $9}')
 export SUBNET3_ID=$(aws ec2 describe-subnets --filters Name=tag:Name,Values=$SUBNET3_NAME --output text | awk '{print $9}')
+export SUBNET4_ID=$(aws ec2 describe-subnets --filters Name=tag:Name,Values=$SUBNET4_NAME --output text | awk '{print $9}')
+export SUBNET5_ID=$(aws ec2 describe-subnets --filters Name=tag:Name,Values=$SUBNET5_NAME --output text | awk '{print $9}')
+export SUBNET6_ID=$(aws ec2 describe-subnets --filters Name=tag:Name,Values=$SUBNET6_NAME --output text | awk '{print $9}')
 export IG_ID=$(aws ec2 describe-internet-gateways --query 'InternetGateways[*].[InternetGatewayId, Tags[0].Value]' --output text | grep $IG_NAME | awk '{print $1}')
 export ROUTE_TABLE_ID=$(aws ec2 describe-route-tables --query 'RouteTables[*].[RouteTableId, Tags[0].Value]' --output text | grep $ROUTE_TABLE_NAME | awk '{print $1}')
 
@@ -73,6 +79,35 @@ else
 	exit 1
 fi
 
+echo "Deleting Subnet4 ${SUBNET4_NAME}"
+aws ec2 delete-subnet --subnet-id ${SUBNET4_ID}
+if [ $? -eq "0" ]
+then 
+	echo "Subnet4 ${SUBNET4_NAME} deleted successfully!"
+else
+	echo "Deletion of Subnet4 ${SUBNET4_NAME} failed"
+	exit 1
+fi
+
+echo "Deleting Subnet5 ${SUBNET5_NAME}"
+aws ec2 delete-subnet --subnet-id ${SUBNET5_ID}
+if [ $? -eq "0" ]
+then 
+	echo "Subnet5 ${SUBNET5_NAME} deleted successfully!"
+else
+	echo "Deletion of Subnet5 ${SUBNET5_NAME} failed"
+	exit 1
+fi
+
+echo "Deleting Subnet6 ${SUBNET6_NAME}"
+aws ec2 delete-subnet --subnet-id ${SUBNET6_ID}
+if [ $? -eq "0" ]
+then 
+	echo "Subnet6 ${SUBNET6_NAME} deleted successfully!"
+else
+	echo "Deletion of Subnet6 ${SUBNET6_NAME} failed"
+	exit 1
+fi
 
 echo "Deleting Public Route Table ${ROUTE_TABLE_NAME}"
 aws ec2 delete-route-table --route-table-id ${ROUTE_TABLE_ID}
