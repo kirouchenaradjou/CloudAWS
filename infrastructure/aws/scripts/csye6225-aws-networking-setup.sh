@@ -3,6 +3,9 @@ VPC_NAME=${STACK_NAME}-csye6225-vpc
 SUBNET1_NAME=${STACK_NAME}-csye6225-subnet1
 SUBNET2_NAME=${STACK_NAME}-csye6225-subnet2
 SUBNET3_NAME=${STACK_NAME}-csye6225-subnet3
+SUBNET4_NAME=${STACK_NAME}-csye6225-subnet4
+SUBNET5_NAME=${STACK_NAME}-csye6225-subnet5
+SUBNET6_NAME=${STACK_NAME}-csye6225-subnet6
 IG_NAME=${STACK_NAME}-csye6225-InternetGateway
 ROUTE_TABLE_NAME=${STACK_NAME}-csye6225-public-route-table
 
@@ -43,6 +46,39 @@ then
 		aws ec2 create-tags --resources $SUBNET3_ID --tags Key=Name,Value=$SUBNET3_NAME
 	else
 		echo "Creation of Subnet 3 Failed"
+		exit 1
+	fi
+
+	echo "Creating Subnet4..."
+	export SUBNET4_ID=$(aws ec2 create-subnet --vpc-id $VPC_ID --availability-zone "us-east-1a" --cidr-block 10.0.4.0/24 --query 'Subnet.SubnetId' --output text)
+	if [ $? -eq 0 ]
+	then
+		echo "Subnet 4 ${SUBNET4_NAME} Created successfully!"
+		aws ec2 create-tags --resources $SUBNET4_ID --tags Key=Name,Value=$SUBNET4_NAME
+	else
+		echo "Creation of Subnet 4 Failed"
+		exit 1
+	fi
+
+	echo "Creating Subnet5..."
+	export SUBNET5_ID=$(aws ec2 create-subnet --vpc-id $VPC_ID --availability-zone "us-east-1b" --cidr-block 10.0.5.0/24 --query 'Subnet.SubnetId' --output text)
+	if [ $? -eq 0 ]
+	then
+		echo "Subnet 5 ${SUBNET5_NAME} Created successfully!"
+		aws ec2 create-tags --resources $SUBNET5_ID --tags Key=Name,Value=$SUBNET5_NAME
+	else
+		echo "Creation of Subnet 5 Failed"
+		exit 1
+	fi
+
+	echo "Creating Subnet6..."
+	export SUBNET6_ID=$(aws ec2 create-subnet --vpc-id $VPC_ID --availability-zone "us-east-1c" --cidr-block 10.0.6.0/24 --query 'Subnet.SubnetId' --output text)
+	if [ $? -eq 0 ]
+	then
+		echo "Subnet 6 ${SUBNET6_NAME} Created successfully!"
+		aws ec2 create-tags --resources $SUBNET6_ID --tags Key=Name,Value=$SUBNET6_NAME
+	else
+		echo "Creation of Subnet 6 Failed"
 		exit 1
 	fi
 
