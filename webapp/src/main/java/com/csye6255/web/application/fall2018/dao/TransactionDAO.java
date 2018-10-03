@@ -8,4 +8,5 @@ import org.springframework.data.repository.CrudRepository;
 public interface  TransactionDAO extends CrudRepository<Transaction, Long> {
 
     List<Transaction> findByUserId(long userId);
+    List<Transaction> findByTransactionid(String transactionid);
 }
