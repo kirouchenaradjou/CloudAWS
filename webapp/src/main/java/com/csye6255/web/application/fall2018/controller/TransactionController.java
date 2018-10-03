@@ -147,7 +147,41 @@ public class TransactionController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(jsonObject.toString());
 
         }
+    }
 
+    @RequestMapping(value = "/transaction/{transactionid}", method = RequestMethod.DELETE, headers = {"content-type=application/json; charset=utf-8"})
+    @ResponseBody
+    public ResponseEntity<?> deleteTransactions(@PathVariable("transactionid") String transactionid, HttpServletRequest request)
+    {
+        final String authorization = request.getHeader("Authorization");
+        if (authorization != null && authorization.toLowerCase().startsWith("basic")) {
+            String[] values = AuthorizationUtility.getHeaderValues(authorization);
+            String userName = values[0];
+            String password = values[1];
+            BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+            List<User> userList = userDao.findByUserName(userName);
+            if (userList.size() != 0) {
+                User user = userList.get(0);
+                List<Transaction> transactionList = transactionDAO.findByTransactionid(transactionid);
+                if (encoder.matches(password, user.getPassword())) {
+                    if (transactionList.size() != 0) {
+                        Transaction trans = transactionList.get(0);
+                        transactionDAO.delete(trans);
+                        return new ResponseEntity<>(null, HttpStatus.NO_CONTENT);
+                    } else {
+                        return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+                    }
+                }
+                else {
+                    return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
+                }
+            }
+            else {
+                return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
+            }
+        }
+        else
+            return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
     }
 
 }
