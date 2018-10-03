@@ -21,8 +21,8 @@ import java.util.UUID;
 public class Transaction {
 
     @GeneratedValue(generator = "uuid")
-    @GenericGenerator(name = "uuid", strategy = "uuid")
-    @Column(columnDefinition = "CHAR(32)")
+    @GenericGenerator(name = "uuid", strategy = "uuid2")
+    @Column(columnDefinition = "varchar(36)")
     @Id
     private String transactionid;
 
