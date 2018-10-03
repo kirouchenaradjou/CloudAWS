@@ -62,7 +62,7 @@ public class TransactionController {
                             jsonObject.addProperty("id",transaction.getAmount());
                             jsonObject.addProperty("id",transaction.getDate());
                             jsonObject.addProperty("id",transaction.getMerchant());
-                            jsonObject.addProperty("id",transaction.getCatergory());
+                            jsonObject.addProperty("id",transaction.getCategory());
                         }
                     }
                     else
@@ -109,7 +109,7 @@ public class TransactionController {
                     t.setAmount(transaction.getAmount());
                     t.setDate(transaction.getDate());
                     t.setMerchant(transaction.getMerchant());
-                    t.setCatergory(transaction.getCatergory());
+                    t.setCategory(transaction.getCategory());
                     t.setUser(user);
                     transactionDAO.save(t);
                     jsonObject.addProperty("message", "Transaction  Successful");
