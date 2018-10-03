@@ -95,12 +95,12 @@ public class Transaction {
         this.merchant = merchant;
     }
 
-    public String getCatergory() {
+    public String getCategory() {
         return category;
     }
 
-    public void setCatergory(String catergory) {
-        this.category = catergory;
+    public void setCategory(String category) {
+        this.category = category;
     }
 }
 
