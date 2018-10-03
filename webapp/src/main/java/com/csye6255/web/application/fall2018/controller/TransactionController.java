@@ -15,8 +15,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import java.nio.charset.StandardCharsets;
-import java.util.Base64;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -35,7 +34,7 @@ public class TransactionController {
 
     @RequestMapping(value = "/transaction", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
-    public String getTransactions(@RequestHeader HttpHeaders headers, HttpServletRequest request)
+    public ResponseEntity getTransactions(@RequestHeader HttpHeaders headers, HttpServletRequest request)
     {
         JsonObject jsonObject = new JsonObject();
         final String authorization = request.getHeader("Authorization");
@@ -45,43 +44,51 @@ public class TransactionController {
             String password = values[1];
             BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
             List<User> userList = userDao.findByUserName(userName);
-
+            List<JsonObject> jsonObjectList = new ArrayList<>();
 
             if (userList.size() != 0) {
                 User user = userList.get(0);
                 if (encoder.matches(password, user.getPassword())) {
-                    // jsonObject.addProperty("message", "Current Time is : "+ new Date().toString());
-
                     List<Transaction> transactionList=transactionDAO.findByUserId(user.getId());
-
-
                     if( ((List) transactionList).size()!=0){
                         for (Transaction transaction : transactionList) {
-                            //jsonObject.addProperty("id",transaction.get());
-                            jsonObject.addProperty("id",transaction.getDescription());
-                            jsonObject.addProperty("id",transaction.getAmount());
-                            jsonObject.addProperty("id",transaction.getDate());
-                            jsonObject.addProperty("id",transaction.getMerchant());
-                            jsonObject.addProperty("id",transaction.getCategory());
+                            jsonObject.addProperty("id",transaction.getTransactionid());
+                            jsonObject.addProperty("description",transaction.getDescription());
+                            jsonObject.addProperty("merchant",transaction.getAmount());
+                            jsonObject.addProperty("amount",transaction.getDate());
+                            jsonObject.addProperty("date",transaction.getMerchant());
+                            jsonObject.addProperty("category",transaction.getCategory());
+                            jsonObjectList.add(jsonObject);
                         }
+                        return ResponseEntity.status(HttpStatus.OK).body(jsonObjectList.toString());
+
                     }
                     else
                     {
                         jsonObject.addProperty("message", "There is no transactions to show");
+                        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(jsonObject.toString());
                     }
 
-                } else jsonObject.addProperty("message", "Incorrect Password");
+                } else {
+                    jsonObject.addProperty("message", "Incorrect Password");
+                    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(jsonObject.toString());
+                }
 
 
-            } else jsonObject.addProperty("message", "User not found! - Try Logging in again");
+
+            } else {
+                jsonObject.addProperty("message", "User not found! - Try Logging in again");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(jsonObject.toString());
+            }
 
         }
 
-        else
+        else {
             jsonObject.addProperty("message","You are not logged in!");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(jsonObject.toString());
 
+        }
 
-        return jsonObject.toString();
 
     }
 
@@ -103,19 +110,25 @@ public class TransactionController {
             if (userList.size() != 0) {
                 User user = userList.get(0);
                 if (encoder.matches(password, user.getPassword())) {
-                    Transaction t = new Transaction();
-                    t.setTransactionid(transaction.getTransactionid());
-                    t.setDescription(transaction.getDescription());
-                    t.setAmount(transaction.getAmount());
-                    t.setDate(transaction.getDate());
-                    t.setMerchant(transaction.getMerchant());
-                    t.setCategory(transaction.getCategory());
-                    t.setUser(user);
-                    transactionDAO.save(t);
-                    jsonObject.addProperty("message", "Transaction  Successful");
-                    return ResponseEntity.status(HttpStatus.CREATED).body(jsonObject.toString());
+                    if(transaction.getDescription()!=null && transaction.getAmount()!=null
+                            && transaction.getDate()!=null && transaction.getMerchant()!=null && transaction.getCategory()!=null) {
+                        Transaction t = new Transaction();
+                        t.setTransactionid(transaction.getTransactionid());
+                        t.setDescription(transaction.getDescription());
+                        t.setAmount(transaction.getAmount());
+                        t.setDate(transaction.getDate());
+                        t.setMerchant(transaction.getMerchant());
+                        t.setCategory(transaction.getCategory());
+                        t.setUser(user);
+                        transactionDAO.save(t);
+                        jsonObject.addProperty("message", "Transaction  Successful");
+                        return ResponseEntity.status(HttpStatus.CREATED).body(jsonObject.toString());
+                    }
+                    else {
+                        jsonObject.addProperty("message", "Transaction not successful - Provide id,desc,amount,date,merchant,category");
+                        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(jsonObject.toString());
 
-
+                    }
                 } else {
                     jsonObject.addProperty("message", "Incorrect Password");
                     return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(jsonObject.toString());
