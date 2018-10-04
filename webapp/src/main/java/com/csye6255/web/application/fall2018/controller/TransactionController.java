@@ -20,7 +20,6 @@ import java.util.List;
 
 /**
  * @author Akilan Rajendiran
- *
  */
 
 @Controller
@@ -34,10 +33,9 @@ public class TransactionController {
 
     @RequestMapping(value = "/transaction", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
-    public ResponseEntity getTransactions(@RequestHeader HttpHeaders headers, HttpServletRequest request)
-    {
-        JsonObject jsonObject = new JsonObject();
+    public ResponseEntity getTransactions(@RequestHeader HttpHeaders headers, HttpServletRequest request) {
         final String authorization = request.getHeader("Authorization");
+        JsonObject jsonObject = new JsonObject();
         if (authorization != null && authorization.toLowerCase().startsWith("basic")) {
             String[] values = AuthorizationUtility.getHeaderValues(authorization);
             String userName = values[0];
@@ -49,22 +47,21 @@ public class TransactionController {
             if (userList.size() != 0) {
                 User user = userList.get(0);
                 if (encoder.matches(password, user.getPassword())) {
-                    List<Transaction> transactionList=transactionDAO.findByUserId(user.getId());
-                    if( ((List) transactionList).size()!=0){
+                    List<Transaction> transactionList = transactionDAO.findByUserId(user.getId());
+                    if (((List) transactionList).size() != 0) {
                         for (Transaction transaction : transactionList) {
-                            jsonObject.addProperty("id",transaction.getTransactionid());
-                            jsonObject.addProperty("description",transaction.getDescription());
-                            jsonObject.addProperty("merchant",transaction.getAmount());
-                            jsonObject.addProperty("amount",transaction.getDate());
-                            jsonObject.addProperty("date",transaction.getMerchant());
-                            jsonObject.addProperty("category",transaction.getCategory());
-                            jsonObjectList.add(jsonObject);
+                            JsonObject jsonObject1 = new JsonObject();
+                            jsonObject1.addProperty("id", transaction.getTransactionid());
+                            jsonObject1.addProperty("description", transaction.getDescription());
+                            jsonObject1.addProperty("merchant", transaction.getAmount());
+                            jsonObject1.addProperty("amount", transaction.getDate());
+                            jsonObject1.addProperty("date", transaction.getMerchant());
+                            jsonObject1.addProperty("category", transaction.getCategory());
+                            jsonObjectList.add(jsonObject1);
                         }
                         return ResponseEntity.status(HttpStatus.OK).body(jsonObjectList.toString());
 
-                    }
-                    else
-                    {
+                    } else {
                         jsonObject.addProperty("message", "There is no transactions to show");
                         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(jsonObject.toString());
                     }
@@ -75,16 +72,13 @@ public class TransactionController {
                 }
 
 
-
             } else {
                 jsonObject.addProperty("message", "User not found! - Try Logging in again");
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(jsonObject.toString());
             }
 
-        }
-
-        else {
-            jsonObject.addProperty("message","You are not logged in!");
+        } else {
+            jsonObject.addProperty("message", "You are not logged in!");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(jsonObject.toString());
 
         }
@@ -95,8 +89,7 @@ public class TransactionController {
     @RequestMapping(value = "/transaction", method = RequestMethod.POST, produces = {"application/json"},
             consumes = "application/json", headers = {"content-type=application/json; charset=utf-8"})
     @ResponseBody
-    public ResponseEntity createTransactions(HttpServletRequest request,@RequestBody Transaction transaction)
-    {
+    public ResponseEntity createTransactions(HttpServletRequest request, @RequestBody Transaction transaction) {
         JsonObject jsonObject = new JsonObject();
         final String authorization = request.getHeader("Authorization");
         if (authorization != null && authorization.toLowerCase().startsWith("basic")) {
@@ -110,8 +103,8 @@ public class TransactionController {
             if (userList.size() != 0) {
                 User user = userList.get(0);
                 if (encoder.matches(password, user.getPassword())) {
-                    if(transaction.getDescription()!=null && transaction.getAmount()!=null
-                            && transaction.getDate()!=null && transaction.getMerchant()!=null && transaction.getCategory()!=null) {
+                    if (transaction.getDescription() != null && transaction.getAmount() != null
+                            && transaction.getDate() != null && transaction.getMerchant() != null && transaction.getCategory() != null) {
                         Transaction t = new Transaction();
                         t.setTransactionid(transaction.getTransactionid());
                         t.setDescription(transaction.getDescription());
@@ -123,8 +116,7 @@ public class TransactionController {
                         transactionDAO.save(t);
                         jsonObject.addProperty("message", "Transaction  Successful");
                         return ResponseEntity.status(HttpStatus.CREATED).body(jsonObject.toString());
-                    }
-                    else {
+                    } else {
                         jsonObject.addProperty("message", "Transaction not successful - Provide id,desc,amount,date,merchant,category");
                         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(jsonObject.toString());
 
@@ -140,10 +132,8 @@ public class TransactionController {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(jsonObject.toString());
             }
 
-        }
-
-        else {
-            jsonObject.addProperty("message","You are not logged in - Provide Username and Password!");
+        } else {
+            jsonObject.addProperty("message", "You are not logged in - Provide Username and Password!");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(jsonObject.toString());
 
         }
@@ -151,8 +141,7 @@ public class TransactionController {
 
     @RequestMapping(value = "/transaction/{transactionid}", method = RequestMethod.DELETE, headers = {"content-type=application/json; charset=utf-8"})
     @ResponseBody
-    public ResponseEntity<?> deleteTransactions(@PathVariable("transactionid") String transactionid, HttpServletRequest request)
-    {
+    public ResponseEntity<?> deleteTransactions(@PathVariable("transactionid") String transactionid, HttpServletRequest request) {
         final String authorization = request.getHeader("Authorization");
         if (authorization != null && authorization.toLowerCase().startsWith("basic")) {
             String[] values = AuthorizationUtility.getHeaderValues(authorization);
@@ -166,21 +155,18 @@ public class TransactionController {
                 if (encoder.matches(password, user.getPassword())) {
                     if (transactionList.size() != 0) {
                         Transaction trans = transactionList.get(0);
-                        transactionDAO.delete(trans);
-                        return new ResponseEntity<>(null, HttpStatus.NO_CONTENT);
-                    } else {
+                        if (trans.getUser().getId() == user.getId()) {
+                            transactionDAO.delete(trans);
+                            return new ResponseEntity<>(null, HttpStatus.NO_CONTENT);
+                        } else
+                            return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
+                    } else
                         return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
-                    }
-                }
-                else {
+                } else
                     return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
-                }
-            }
-            else {
+            } else
                 return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
-            }
-        }
-        else
+        } else
             return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
     }
 
