@@ -2,9 +2,16 @@
 	"AWSTemplateFormatVersion": "2010-09-09",
 	"Description": "Cloud Formation Template - CSYE6225 - Creating EC2 instance , Security Groups and Ingress Rules",
 	"Parameters": {
-		"VPCName": {
+		"EC2Name": {
 			"Type": "String"
-		}
+		},
+		"EC2SecurityGroup": {
+			"Type": "String"
+		},
+		"SubnetId1":{
+			"Type":"String"
+		},
+		"VpcId":{"Type":"String"}
 	},
 	"Resources": {
 		"ourEC2Instance": {
@@ -25,14 +32,16 @@
 				"Tags" : [
 					{
 						"Key" : "Name",
-						"Value" : {"Ref":"ourEC2Instance"}
+						"Value" : {"Ref":"EC2Name"}
 					}
 				],
-				"SecurityGroups" : [{
-					"Ref" : "WebServerSecurityGroup",
+				"SecurityGroupIds" : [{
+					"Ref" : "EC2SecurityGroup"
 
-				}]
-
+				}],
+				"SubnetId" : {
+					"Ref":"SubnetId1"
+				}
 
 
 			}
@@ -42,7 +51,7 @@
 			"Properties" : {
 				"GroupName" : "csye6225-webapp",
 				"GroupDescription" : "Access to ports 22, 80 & 443",
-				"VpcId":{"Ref":"VPCName"},
+				"VpcId": {"Ref":"VpcId"},
 				"SecurityGroupIngress" : [ {
 					"IpProtocol" : "tcp",
 					"FromPort" : "22",
@@ -70,9 +79,12 @@
 					"IpProtocol" : "tcp",
 					"FromPort" : "3306",
 					"ToPort" : "3306",
-					"SourceSecurityGroupName" : { "Ref" : "WebServerSecurityGroup" }
-				}]
+					"SourceSecurityGroupId" : { "Ref" : "EC2SecurityGroup" }
+				}],
+				"VpcId": {"Ref":"VpcId"}
 			}
+
 		}
 
 	}
+}
