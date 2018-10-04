@@ -168,6 +168,73 @@ public class TransactionController {
                 return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
         } else
             return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
+
+    }
+
+    @RequestMapping(value = "/transaction/{transactionid}", method = RequestMethod.PUT, produces = {"application/json"},
+            consumes = "application/json", headers = {"content-type=application/json; charset=utf-8"})
+    @ResponseBody
+    public ResponseEntity updateTransaction(@PathVariable("transactionid") String transactionid, HttpServletRequest request, @RequestBody Transaction transaction) {
+        JsonObject jsonObject = new JsonObject();
+        final String authorization = request.getHeader("Authorization");
+        if (authorization != null && authorization.toLowerCase().startsWith("basic")) {
+            String[] values = AuthorizationUtility.getHeaderValues(authorization);
+            String userName = values[0];
+            String password = values[1];
+            BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+            List<User> userList = userDao.findByUserName(userName);
+
+
+            if (userList.size() != 0) {
+                User user = userList.get(0);
+                List<Transaction> transactionList = transactionDAO.findByTransactionid(transactionid);
+                if (encoder.matches(password, user.getPassword())) {
+
+
+                    if (transaction.getDescription() != null && transaction.getAmount() != null
+                            && transaction.getDate() != null && transaction.getMerchant() != null && transaction.getCategory() != null
+                            && transactionList.size() != 0 && transactionList.get(0).getTransactionid().equals(transactionid)) {
+
+
+                            Transaction trans = transactionList.get(0);
+
+
+                            trans.setAmount(transaction.getAmount());
+                            trans.setCategory(transaction.getCategory());
+                            trans.setDate(transaction.getDate());
+                            trans.setDescription(transaction.getDescription());
+                            trans.setMerchant(transaction.getMerchant());
+                            trans.setTransactionid(transaction.getTransactionid());
+                            trans.setUser(user);
+                            transactionDAO.save(trans);
+
+                            jsonObject.addProperty("message", "Transaction  Successful");
+                            return ResponseEntity.status(HttpStatus.CREATED).body(jsonObject.toString());
+
+
+                    } else {
+                        jsonObject.addProperty("message", "Transaction not successful - Provide id,desc,amount,date,merchant,category");
+                        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(jsonObject.toString());
+
+                    }
+                } else {
+                    jsonObject.addProperty("message", "Incorrect Password");
+                    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(jsonObject.toString());
+                }
+
+
+            } else {
+                jsonObject.addProperty("message", "User not found! - Try Logging in again");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(jsonObject.toString());
+            }
+
+        } else {
+            jsonObject.addProperty("message", "You are not logged in - Provide Username and Password!");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(jsonObject.toString());
+
+        }
+
+
     }
 
 }
