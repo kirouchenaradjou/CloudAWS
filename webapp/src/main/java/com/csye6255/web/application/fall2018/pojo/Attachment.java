@@ -11,7 +11,7 @@ import javax.persistence.*;
  * @author rkirouchenaradjou
  */
 @Entity
-@Table(name = "transaction_table")
+@Table(name = "attachment_table")
 public class Attachment {
 
     @GeneratedValue(generator = "uuid")
