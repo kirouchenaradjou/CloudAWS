@@ -5,13 +5,40 @@ EC2VOL_SIZE="16"
 EC2VOL_TYPE="gp2"
 AMI_IMAGE="ami-9887c6e7"
 DYNAMO_TABLE="csye6225"
+MASTER_USERNAME="csye6225master"
+MASTER_USERPWD="csye6225password"
+DB_NAME="csye6225"
+DB_INSTANCE_CLASS="db.t2.medium"
+DB_INSTANCE_IDENTIFIER="csye6225-fall2018"
+DB_ENGINE="MySQL"
 
 export vpcId=$(aws ec2 describe-vpcs --query "Vpcs[*].[CidrBlock, VpcId]" --output text|grep 10.0.0.0/16|awk '{print $2}')
 export subnetId1=$(aws ec2 describe-subnets --query 'Subnets[*].[SubnetId, VpcId, AvailabilityZone, CidrBlock]' --output text|grep 10.0.1.0/24|grep us-east-1a|awk '{print $1}')
+export subnetId2=$(aws ec2 describe-subnets --query 'Subnets[*].[SubnetId, VpcId, AvailabilityZone]' --output text|grep $vpcId|grep us-east-1b|awk '{print $1}')
+export subnetId3=$(aws ec2 describe-subnets --query 'Subnets[*].[SubnetId, VpcId, AvailabilityZone]' --output text|grep $vpcId|grep us-east-1c|awk '{print $1}')
 export eC2SecurityGroupId=$(aws ec2 describe-security-groups --query 'SecurityGroups[*].[VpcId, GroupId]' --output text|grep ${vpcId}|awk '{print $2}')
+export rDSSecurityGroupId=$(aws ec2 describe-security-groups --query 'SecurityGroups[*].[VpcId, Description, GroupId]' --output text|grep $vpcId|grep rds|awk '{print $3}')
 
-aws cloudformation create-stack --stack-name $STACK_NAME --template-body file://csye6225-cf-application.json --parameters ParameterKey=VpcId,ParameterValue=$vpcId ParameterKey=EC2Name,ParameterValue=$EC2_Name ParameterKey=EC2SecurityGroup,ParameterValue=$eC2SecurityGroupId ParameterKey=SubnetId1,ParameterValue=$subnetId1 ParameterKey=EC2VolumeSize,ParameterValue=$EC2VOL_SIZE ParameterKey=EC2VolumeType,ParameterValue=$EC2VOL_TYPE ParameterKey=AMIImage,ParameterValue=$AMI_IMAGE
+aws cloudformation create-stack --stack-name $STACK_NAME --template-body file://csye6225-cf-application.json --parameters 
+ParameterKey=VpcId,ParameterValue=$vpcId 
+ParameterKey=EC2Name,ParameterValue=$EC2_Name 
+ParameterKey=EC2SecurityGroup,ParameterValue=$eC2SecurityGroupId 
+ParameterKey=SubnetId1,ParameterValue=$subnetId1 
+ParameterKey=EC2VolumeSize,ParameterValue=$EC2VOL_SIZE 
+ParameterKey=EC2VolumeType,ParameterValue=$EC2VOL_TYPE 
+ParameterKey=AMIImage,ParameterValue=$AMI_IMAGE
 ParameterKey=DynamoDBName,ParameterValue=$DYNAMO_TABLE
+ParameterKey=MasterUsername,ParameterValue=$MASTER_USERNAME
+ParameterKey=MasterUserPwd,ParameterValue=$MASTER_USERPWD
+ParameterKey=DBName,ParameterValue=$DB_NAME
+ParameterKey=DBInstanceClass,ParameterValue=$DB_INSTANCE_CLASS
+ParameterKey=DBInstanceIdentifier,ParameterValue=$DB_INSTANCE_IDENTIFIER
+ParameterKey=DBEngine,ParameterValue=$DB_ENGINE
+ParameterKey=subnetId2,ParameterValue$subnetId2
+ParameterKey=subnetId3,ParameterValue$subnetId3
+ParameterKey=RDSSecurityGroup,ParameterValue=$rDSSecurityGroupId
+
+
 
 export STACK_STATUS=$(aws cloudformation describe-stacks --stack-name $STACK_NAME --query "Stacks[][ [StackStatus ] ][]" --output text)
 
