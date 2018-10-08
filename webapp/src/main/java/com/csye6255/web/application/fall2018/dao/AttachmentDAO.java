@@ -7,7 +7,8 @@ import org.springframework.data.repository.CrudRepository;
 
 import java.util.List;
 
-public interface AttachmentDAO extends CrudRepository<Attachment, Transaction>  {
-    List<Attachment> findAttachmentsByTransaction(Transaction transaction);
-    Attachment findAttachmentByAttachmentid(String attachmentid);
+public interface AttachmentDAO extends CrudRepository<Attachment, String>  {
+    List<Attachment> findByAttachmentid(String attachmentid);
+    List<Attachment> findByTransactionId(String transactionid);
+
 }
