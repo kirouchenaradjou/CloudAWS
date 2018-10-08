@@ -22,6 +22,9 @@
 				},
 				"AMIImage":{
 					"Type":"String"
+				},
+				"DynamoDBName":{
+					"Type":"String"
 				}
 			},
 			"Resources": {
@@ -49,7 +52,7 @@
 						"Tags" : [
 							{
 								"Key" : "Name",
-								"Value" : {"Ref":"EC2Name"}
+								"Value" : "ec2Test"
 							}
 						],
 						"SecurityGroupIds" : [{
@@ -99,6 +102,30 @@
 						"VpcId": {"Ref":"VpcId"}
 					}
 
+				},
+				"ourDynamoTable": {
+					"Type" : "AWS::DynamoDB::Table",
+					"Properties" : {
+						"KeySchema": [
+							{
+								"AttributeName": "id",
+								"KeyType": "HASH"
+							}
+						],
+						"AttributeDefinitions": [
+							{
+								"AttributeName": "id",
+								"AttributeType": "S"
+							}
+						],
+						"TableName": {
+    					 		"Ref": "DynamoDBName"
+    						},
+    						"ProvisionedThroughput":{
+    							"ReadCapacityUnits": "5",
+							"WriteCapacityUnits": "5"
+    						}
+					}
 				}
 
 			}

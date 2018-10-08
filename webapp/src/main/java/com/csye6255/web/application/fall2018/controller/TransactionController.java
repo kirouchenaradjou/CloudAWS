@@ -53,9 +53,9 @@ public class TransactionController {
                             JsonObject jsonObject1 = new JsonObject();
                             jsonObject1.addProperty("id", transaction.getTransactionid());
                             jsonObject1.addProperty("description", transaction.getDescription());
-                            jsonObject1.addProperty("merchant", transaction.getAmount());
-                            jsonObject1.addProperty("amount", transaction.getDate());
-                            jsonObject1.addProperty("date", transaction.getMerchant());
+                            jsonObject1.addProperty("amount", transaction.getAmount());
+                            jsonObject1.addProperty("date", transaction.getDate());
+                            jsonObject1.addProperty("merchant", transaction.getMerchant());
                             jsonObject1.addProperty("category", transaction.getCategory());
                             jsonObjectList.add(jsonObject1);
                         }
