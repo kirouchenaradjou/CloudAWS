@@ -16,16 +16,12 @@ BUCKET_NAME="haha.me.csye6225.com"
 export vpcId=$(aws ec2 describe-vpcs --query "Vpcs[*].[CidrBlock, VpcId]" --output text|grep 10.0.0.0/16|awk '{print $2}')
 echo "VpcId : ${vpcId}"
 export subnetId1=$(aws ec2 describe-subnets --query 'Subnets[*].[SubnetId, VpcId, AvailabilityZone, CidrBlock]' --output text|grep 10.0.1.0/24|grep us-east-1a|awk '{print $1}')
-# export subnetId1=$(aws ec2 describe-subnets --query 'Subnets[*].[SubnetId, VpcId, AvailabilityZone]' --output text|grep ${vpcId}|grep us-east-1a|awk '{print $1}')
 echo "subnetId1 : ${subnetId1}"
-# export subnetId2=$(aws ec2 describe-subnets --query 'Subnets[*].[SubnetId, VpcId, AvailabilityZone]' --output text|grep $vpcId|grep us-east-1b|awk '{print $1}')
 export subnetId2=$(aws ec2 describe-subnets --query 'Subnets[*].[SubnetId, VpcId, AvailabilityZone, CidrBlock]' --output text|grep 10.0.2.0/24|grep us-east-1b|awk '{print $1}')
 echo "subnetId2 : ${subnetId2}"
 export subnetId3=$(aws ec2 describe-subnets --query 'Subnets[*].[SubnetId, VpcId, AvailabilityZone, CidrBlock]' --output text|grep 10.0.3.0/24|grep us-east-1c|awk '{print $1}')
-# export subnetId3=$(aws ec2 describe-subnets --query 'Subnets[*].[SubnetId, VpcId, AvailabilityZone]' --output text|grep $vpcId|grep us-east-1c|awk '{print $1}')
 echo "subnetId3 : ${subnetId3}"
 export eC2SecurityGroupId=$(aws ec2 describe-security-groups --query 'SecurityGroups[*].[VpcId, GroupName, GroupId]' --output text|grep ${vpcId}|grep csye6225-webapp|awk '{print $3}')
-# export eC2SecurityGroupId=$(aws ec2 describe-security-groups --query 'SecurityGroups[*].[Description, GroupId]' --output text|grep webapp|awk '{print $2}')
 echo "eC2SecurityGroupId : ${eC2SecurityGroupId}"
 export rDSSecurityGroupId=$(aws ec2 describe-security-groups --query 'SecurityGroups[*].[GroupName, GroupId]' --output text|grep rds|awk '{print $2}')
 echo "rDSSecurityGroupId : ${rDSSecurityGroupId}"
