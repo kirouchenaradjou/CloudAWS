@@ -9,4 +9,7 @@ import java.util.List;
 public  interface  AttachmentDAO extends CrudRepository<Attachment, Long> {
 
     List<Attachment> findByTransaction(String transaction);
+
+
+    Attachment findByAttachmentid(String attachmentid);
 }

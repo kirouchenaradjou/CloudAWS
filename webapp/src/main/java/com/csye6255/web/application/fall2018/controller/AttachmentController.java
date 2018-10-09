@@ -138,4 +138,48 @@ public class AttachmentController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(jsonObject.toString());
         }
     }
+
+    @RequestMapping(value = "/transaction/{transactionid}/attachments/{attachmentid}",
+            method = RequestMethod.DELETE, headers = {"content-type=application/json; charset=utf-8"})
+    @ResponseBody
+    public ResponseEntity<?> deleteFile(@PathVariable("transactionid") String transactionid, @PathVariable("attachmentid") String attachmentid,
+                                        HttpServletRequest request) {
+        final String authorization = request.getHeader("Authorization");
+        if (authorization != null && authorization.toLowerCase().startsWith("basic")) {
+            String[] values = AuthorizationUtility.getHeaderValues(authorization);
+            String userName = values[0];
+            String password = values[1];
+            BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+            List<User> userList = userDao.findByUserName(userName);
+            if (userList.size() != 0) {
+                User user = userList.get(0);
+                List<Transaction> transactionList = transactionDAO.findByTransactionid(transactionid);
+                if (encoder.matches(password, user.getPassword())) {
+                    if (transactionList.size() != 0) {
+                        for (Transaction transaction : transactionList) {
+                            if (transaction.getTransactionid() == transactionid) {
+                                Attachment attachment = attachmentDAO.findByAttachmentid(attachmentid);
+                                if(attachment != null)
+                                {
+                                    if (attachment.getAttachmentid() == attachmentid) {
+                                        attachmentDAO.delete(attachment);
+                                        return new ResponseEntity<>(null, HttpStatus.NO_CONTENT);
+                                    } else
+                                        return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+                                }
+                            } else
+                                return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+                        }
+                    } else
+                        return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+                } else
+                    return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
+            } else
+                return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
+        } else
+            return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
+        return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
+
+    }
+
 }
