@@ -102,17 +102,17 @@ public class AttachmentController {
             if (userList.size() != 0) {
                 User user = userList.get(0);
                 if (encoder.matches(password, user.getPassword())) {
-                    List<Transaction> transactionList = transactionDAO.findByUserId(user.getId());
+                    List<Transaction> transactionList = transactionDAO.findByTransactionid(transactionid);
                     if (transactionList.size() != 0) {
                         Transaction trans = transactionList.get(0);
                         if (trans.getUser().getId() == user.getId()) {
-                            List<Attachment> attachmentList = attachmentDAO.findByTransaction(transactionid);
+                            List<Attachment> attachmentList = attachmentDAO.findByTransaction(trans);
                             if (attachmentList.size() != 0) {
                                 for (Attachment attachment : attachmentList) {
-                                    JsonObject jsonObject1 = new JsonObject();
-                                    jsonObject.addProperty("id", attachment.getAttachmentid());
-                                    jsonObject.addProperty("url", attachment.getUrl());
-                                    jsonObjectList.add(jsonObject1);
+                                    JsonObject attachmentObj = new JsonObject();
+                                    attachmentObj.addProperty("id", attachment.getAttachmentid());
+                                    attachmentObj.addProperty("url", attachment.getUrl());
+                                    jsonObjectList.add(attachmentObj);
                                 }
                                 return ResponseEntity.status(HttpStatus.OK).body(jsonObjectList.toString());
                             } else {
@@ -139,10 +139,10 @@ public class AttachmentController {
         }
     }
 
-    @RequestMapping(value = "/transaction/{transactionid}/attachments/{attachmentid}",
+   /* @RequestMapping(value = "/transaction/{transactionid}/attachments/{attachmentid}",
             method = RequestMethod.DELETE, headers = {"content-type=application/json; charset=utf-8"})
-    @ResponseBody
-    public ResponseEntity<?> deleteFile(@PathVariable("transactionid") String transactionid, @PathVariable("attachmentid") String attachmentid,
+    @ResponseBody*/
+    /*public ResponseEntity<?> deleteFile(@PathVariable("transactionid") String transactionid, @PathVariable("attachmentid") String attachmentid,
                                         HttpServletRequest request) {
         final String authorization = request.getHeader("Authorization");
         if (authorization != null && authorization.toLowerCase().startsWith("basic")) {
@@ -158,10 +158,10 @@ public class AttachmentController {
                     if (transactionList.size() != 0) {
                         for (Transaction transaction : transactionList) {
                             if (transaction.getTransactionid() == transactionid) {
-                                Attachment attachment = attachmentDAO.findByAttachmentid(attachmentid);
-                                if(attachment != null)
+                               // Attachment attachment = attachmentDAO.findByTransaction(attachmentid);
+                                //if(attachment != null)
                                 {
-                                    if (attachment.getAttachmentid() == attachmentid) {
+                                   // if (attachment.getAttachmentid() == attachmentid) {
                                         attachmentDAO.delete(attachment);
                                         return new ResponseEntity<>(null, HttpStatus.NO_CONTENT);
                                     } else
@@ -180,6 +180,6 @@ public class AttachmentController {
             return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
         return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
 
-    }
+    }*/
 
 }
