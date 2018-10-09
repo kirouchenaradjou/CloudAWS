@@ -1,5 +1,6 @@
 package com.csye6255.web.application.fall2018.controller;
 
+import com.csye6255.web.application.fall2018.dao.AttachmentDAO;
 import com.csye6255.web.application.fall2018.dao.TransactionDAO;
 import com.csye6255.web.application.fall2018.dao.UserDAO;
 import com.csye6255.web.application.fall2018.pojo.Transaction;
@@ -31,6 +32,9 @@ public class TransactionController {
     @Autowired
     TransactionDAO transactionDAO;
 
+    @Autowired
+    AttachmentDAO attachmentDAO;
+
     @RequestMapping(value = "/transaction", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
     public ResponseEntity getTransactions(@RequestHeader HttpHeaders headers, HttpServletRequest request) {
@@ -53,9 +57,9 @@ public class TransactionController {
                             JsonObject jsonObject1 = new JsonObject();
                             jsonObject1.addProperty("id", transaction.getTransactionid());
                             jsonObject1.addProperty("description", transaction.getDescription());
-                            jsonObject1.addProperty("merchant", transaction.getAmount());
-                            jsonObject1.addProperty("amount", transaction.getDate());
-                            jsonObject1.addProperty("date", transaction.getMerchant());
+                            jsonObject1.addProperty("amount", transaction.getAmount());
+                            jsonObject1.addProperty("date", transaction.getDate());
+                            jsonObject1.addProperty("merchant", transaction.getMerchant());
                             jsonObject1.addProperty("category", transaction.getCategory());
                             jsonObjectList.add(jsonObject1);
                         }
@@ -199,9 +203,9 @@ public class TransactionController {
                             JsonObject jsonObject1 = new JsonObject();
                             jsonObject1.addProperty("id", trans.getTransactionid());
                             jsonObject1.addProperty("description", trans.getDescription());
-                            jsonObject1.addProperty("merchant", trans.getAmount());
-                            jsonObject1.addProperty("amount", trans.getDate());
-                            jsonObject1.addProperty("date", trans.getMerchant());
+                            jsonObject1.addProperty("merchant", trans.getMerchant());
+                            jsonObject1.addProperty("amount", trans.getAmount());
+                            jsonObject1.addProperty("date", trans.getDate());
                             jsonObject1.addProperty("category", trans.getCategory());
                             return ResponseEntity.status(HttpStatus.CREATED).body(jsonObject1.toString());
                         } else

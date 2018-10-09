@@ -4,7 +4,7 @@
 			"Parameters": {
 				"EC2Name": {
 					"Type": "String"
-					},
+				},
 				"EC2SecurityGroup": {
 					"Type": "String"
 				},
@@ -21,6 +21,30 @@
 					"Type":"String"
 				},
 				"AMIImage":{
+					"Type":"String"
+				},
+				"DynamoDBName":{
+					"Type":"String"
+				},
+				"BucketName":{
+					"Type":"String"
+				},
+				"MasterUsername":{
+					"Type":"String"
+				},
+				"MasterUserPwd":{
+					"Type":"String"
+				},
+				"DBName":{
+					"Type":"String"
+				},
+				"DBInstanceClass":{
+					"Type":"String"
+				},
+				"DBInstanceIdentifier":{
+					"Type":"String"
+				},
+				"DBEngine":{
 					"Type":"String"
 				}
 			},
@@ -49,7 +73,7 @@
 						"Tags" : [
 							{
 								"Key" : "Name",
-								"Value" : {"Ref":"EC2Name"}
+								"Value" : "app-csye6225-ec2"
 							}
 						],
 						"SecurityGroupIds" : [{
@@ -99,7 +123,89 @@
 						"VpcId": {"Ref":"VpcId"}
 					}
 
-				}
+				},
+				"ourDynamoTable": {
+					"Type" : "AWS::DynamoDB::Table",
+					"Properties" : {
+						"KeySchema": [
+							{
+								"AttributeName": "id",
+								"KeyType": "HASH"
+							}
+						],
+						"AttributeDefinitions": [
+							{
+								"AttributeName": "id",
+								"AttributeType": "S"
+							}
+						],
+						"TableName": {
+							"Ref": "DynamoDBName"
+						},
+						"ProvisionedThroughput":{
+							"ReadCapacityUnits": "5",
+							"WriteCapacityUnits": "5"
+						}
+					}
+				},
+				"ourS3Bucket":{
+					"Type" : "AWS::S3::Bucket",
+					"Properties" : {
+						"BucketName":{
+							"Ref":"BucketName"
+						},
+						"Description":"S3 Bucket to store attachment files",
+						"AccessControl" : "Private"
+					}
 
+				},
+				"myRDSDBSubnet": {
+					"Type": "AWS::RDS::DBSubnetGroup",
+					"Properties": {
+						"DBSubnetGroupDescription": "Subnet Group fro RDS Instance",
+						"SubnetIds": [
+							{
+								"Ref": "SubnetId2"
+							},
+							{
+								"Ref": "SubnetId3"
+							}
+						]
+					}
+				},
+				"ourRDSInstance":
+				{
+					"Type" : "AWS::RDS::DBInstance",
+					"Properties" :
+					{
+						"MasterUsername" : {
+							"Ref":"MasterUsername"
+						},
+						"MasterUserPassword" : {
+							"Ref":"MasterUserPwd"
+						},
+						"MultiAZ" : false,
+						"PubliclyAccessible" : false,
+						"DBName": {
+							"Ref": "DBName"
+						},
+						"DBInstanceClass": {
+							"Ref": "DBInstanceClass"
+						},
+						"DBInstanceIdentifier": {
+							"Ref": "DBInstanceIdentifier"
+						},
+						"Engine": {
+							"Ref": "DBEngine"
+						},
+						"DBSubnetGroupName": {
+							"Ref": "myRDSDBSubnet"
+						},
+						"VPCSecurityGroups": [
+							{
+								"Ref": "RDSSecurityGroup"
+							}
+						]
+					}
+				}
 			}
-		}
