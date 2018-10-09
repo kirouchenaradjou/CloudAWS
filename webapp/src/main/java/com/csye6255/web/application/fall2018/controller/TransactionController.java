@@ -5,7 +5,6 @@ import com.csye6255.web.application.fall2018.dao.TransactionDAO;
 import com.csye6255.web.application.fall2018.dao.UserDAO;
 import com.csye6255.web.application.fall2018.pojo.Transaction;
 import com.csye6255.web.application.fall2018.pojo.User;
-import com.csye6255.web.application.fall2018.pojo.Attachment;
 import com.csye6255.web.application.fall2018.utilities.AuthorizationUtility;
 import com.google.gson.JsonObject;
 import org.springframework.beans.factory.annotation.Autowired;

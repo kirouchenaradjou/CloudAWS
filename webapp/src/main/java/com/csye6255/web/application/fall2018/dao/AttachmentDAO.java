@@ -1,4 +1,3 @@
-
 package com.csye6255.web.application.fall2018.dao;
 
 import com.csye6255.web.application.fall2018.pojo.Attachment;
@@ -7,8 +6,7 @@ import org.springframework.data.repository.CrudRepository;
 
 import java.util.List;
 
-public interface AttachmentDAO extends CrudRepository<Attachment, String>  {
-    List<Attachment> findByAttachmentid(String attachmentid);
-    List<Attachment> findByTransactionId(String transactionid);
+public  interface  AttachmentDAO extends CrudRepository<Attachment, Long> {
 
+    List<Attachment> findByTransaction(String transaction);
 }

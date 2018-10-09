@@ -106,7 +106,7 @@ public class AttachmentController {
                     if (transactionList.size() != 0) {
                         Transaction trans = transactionList.get(0);
                         if (trans.getUser().getId() == user.getId()) {
-                            List<Attachment> attachmentList = attachmentDAO.findByTransactionId(transactionid);
+                            List<Attachment> attachmentList = attachmentDAO.findByTransaction(transactionid);
                             if (attachmentList.size() != 0) {
                                 for (Attachment attachment : attachmentList) {
                                     JsonObject jsonObject1 = new JsonObject();
@@ -119,13 +119,12 @@ public class AttachmentController {
                                 jsonObject.addProperty("message", "There are no attachments on this transaction");
                                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(jsonObject.toString());
                             }
-                        }else
+                        } else
                             return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
-                    }else {
+                    } else {
                         jsonObject.addProperty("message", "No transactions to show");
                         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(jsonObject.toString());
                     }
-
                 } else {
                     jsonObject.addProperty("message", "Incorrect Password");
                     return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(jsonObject.toString());
