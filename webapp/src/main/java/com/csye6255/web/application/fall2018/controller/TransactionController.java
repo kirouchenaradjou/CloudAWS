@@ -3,10 +3,15 @@ package com.csye6255.web.application.fall2018.controller;
 import com.csye6255.web.application.fall2018.dao.AttachmentDAO;
 import com.csye6255.web.application.fall2018.dao.TransactionDAO;
 import com.csye6255.web.application.fall2018.dao.UserDAO;
+import com.csye6255.web.application.fall2018.pojo.Attachment;
 import com.csye6255.web.application.fall2018.pojo.Transaction;
 import com.csye6255.web.application.fall2018.pojo.User;
 import com.csye6255.web.application.fall2018.utilities.AuthorizationUtility;
+import com.fasterxml.jackson.databind.deser.BeanDeserializerBuilder;
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -47,7 +52,7 @@ public class TransactionController {
             BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
             List<User> userList = userDao.findByUserName(userName);
             List<JsonObject> jsonObjectList = new ArrayList<>();
-
+            Gson gson = new Gson();
             if (userList.size() != 0) {
                 User user = userList.get(0);
                 if (encoder.matches(password, user.getPassword())) {
@@ -61,6 +66,17 @@ public class TransactionController {
                             jsonObject1.addProperty("date", transaction.getDate());
                             jsonObject1.addProperty("merchant", transaction.getMerchant());
                             jsonObject1.addProperty("category", transaction.getCategory());
+                            List<Attachment> attachmentList = attachmentDAO.findByTransaction(transaction);
+                            JsonObject attachmentObj = new JsonObject();
+
+                            if (attachmentList.size() != 0) {
+                                for (Attachment attachment : attachmentList) {
+                                    attachmentObj.addProperty("id", attachment.getAttachmentid());
+                                    attachmentObj.addProperty("url", attachment.getUrl());
+                                }
+                            }
+                            JsonElement attachmentJsonElement = gson.toJsonTree(attachmentObj);
+                            jsonObject1.add("attachments",attachmentJsonElement);
                             jsonObjectList.add(jsonObject1);
                         }
                         return ResponseEntity.status(HttpStatus.OK).body(jsonObjectList.toString());
@@ -110,6 +126,7 @@ public class TransactionController {
                     if (transaction.getDescription() != null && transaction.getAmount() != null
                             && transaction.getDate() != null && transaction.getMerchant() != null && transaction.getCategory() != null) {
                         Transaction t = new Transaction();
+                        Attachment attachment = new Attachment();
                         t.setTransactionid(transaction.getTransactionid());
                         t.setDescription(transaction.getDescription());
                         t.setAmount(transaction.getAmount());
@@ -118,6 +135,12 @@ public class TransactionController {
                         t.setCategory(transaction.getCategory());
                         t.setUser(user);
                         transactionDAO.save(t);
+
+                        attachment.setUrl(transaction.getAttachments().get(0).getUrl());
+                        attachment.setTransaction(t);
+
+                        attachmentDAO.save(attachment);
+
                         jsonObject.addProperty("message", "Transaction  Successful");
                         return ResponseEntity.status(HttpStatus.CREATED).body(jsonObject.toString());
                     } else {

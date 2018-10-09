@@ -2,12 +2,13 @@ package com.csye6255.web.application.fall2018.pojo;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.google.gson.annotations.Expose;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 import javax.persistence.*;
-import java.util.UUID;
+import java.util.List;
 
 
 /**
@@ -16,8 +17,6 @@ import java.util.UUID;
  */
 @Entity
 @Table(name = "transaction_table")
-
-
 public class Transaction {
 
     @GeneratedValue(generator = "uuid")
@@ -46,6 +45,12 @@ public class Transaction {
     public Transaction() {
     }
 
+    @OneToMany(mappedBy = "transaction", cascade = CascadeType.ALL)
+    private List<Attachment> attachments;
+
+    public List<Attachment> getAttachments() {
+        return attachments;
+    }
 
     public String getTransactionid() {
         return transactionid;
