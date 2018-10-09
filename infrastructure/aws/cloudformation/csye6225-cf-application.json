@@ -46,6 +46,15 @@
 				},
 				"DBEngine":{
 					"Type":"String"
+				},
+				"SubnetId2":{
+					"Type" : "String"
+				},
+				"SubnetId3":{
+					"Type":"String"
+				},
+				"RDSSecurityGroup":{
+					"Type":"String"
 				}
 			},
 			"Resources": {
@@ -78,51 +87,11 @@
 						],
 						"SecurityGroupIds" : [{
 							"Ref" : "EC2SecurityGroup"
-
 						}],
 						"SubnetId" : {
 							"Ref":"SubnetId1"
 						}
 					}
-				},
-				"WebServerSecurityGroup" : {
-					"Type" : "AWS::EC2::SecurityGroup",
-					"Properties" : {
-						"GroupName" : "csye6225-webapp",
-						"GroupDescription" : "Access to ports 22, 80 & 443",
-						"VpcId": {"Ref":"VpcId"},
-						"SecurityGroupIngress" : [ {
-							"IpProtocol" : "tcp",
-							"FromPort" : "22",
-							"ToPort" : "22",
-						"CidrIp" : "0.0.0.0/0" },
-						{
-							"IpProtocol" : "tcp",
-							"FromPort" : "80",
-							"ToPort" : "80",
-						"CidrIp" : "0.0.0.0/0" },
-						{
-							"IpProtocol" : "tcp",
-							"FromPort" : "443",
-							"ToPort" : "443",
-							"CidrIp" : "0.0.0.0/0"
-						} ]
-					}
-				},
-				"DBEC2SecurityGroup": {
-					"Type": "AWS::EC2::SecurityGroup",
-					"Properties" : {
-						"GroupName": "csye6225-rds",
-						"GroupDescription": "Open database for access",
-						"SecurityGroupIngress" : [{
-							"IpProtocol" : "tcp",
-							"FromPort" : "3306",
-							"ToPort" : "3306",
-							"SourceSecurityGroupId" : { "Ref" : "EC2SecurityGroup" }
-						}],
-						"VpcId": {"Ref":"VpcId"}
-					}
-
 				},
 				"ourDynamoTable": {
 					"Type" : "AWS::DynamoDB::Table",
@@ -150,12 +119,12 @@
 				},
 				"ourS3Bucket":{
 					"Type" : "AWS::S3::Bucket",
+					"Description":"S3 Bucket to store attachment files",
 					"Properties" : {
+						"AccessControl" : "Private",
 						"BucketName":{
 							"Ref":"BucketName"
-						},
-						"Description":"S3 Bucket to store attachment files",
-						"AccessControl" : "Private"
+						}
 					}
 
 				},
@@ -177,7 +146,8 @@
 				{
 					"Type" : "AWS::RDS::DBInstance",
 					"Properties" :
-					{
+					{	
+						"AllocatedStorage": "10",
 						"MasterUsername" : {
 							"Ref":"MasterUsername"
 						},
@@ -209,3 +179,4 @@
 					}
 				}
 			}
+}
