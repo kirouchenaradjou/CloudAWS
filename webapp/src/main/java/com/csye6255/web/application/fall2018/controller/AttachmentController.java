@@ -6,6 +6,7 @@ import com.csye6255.web.application.fall2018.dao.UserDAO;
 import com.csye6255.web.application.fall2018.pojo.Attachment;
 import com.csye6255.web.application.fall2018.pojo.Transaction;
 import com.csye6255.web.application.fall2018.pojo.User;
+import com.csye6255.web.application.fall2018.utilities.AttachmentUtility;
 import com.csye6255.web.application.fall2018.utilities.AuthorizationUtility;
 import com.google.gson.JsonObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +18,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.*;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,7 +42,7 @@ public class AttachmentController {
             consumes = "application/json", headers = {"content-type=application/json; charset=utf-8"})
     @ResponseBody
     public ResponseEntity attachFilesToTransaction(@PathVariable("transactionid") String transactionid,
-                                                   HttpServletRequest request, @RequestBody Attachment attachment) {
+                                                   HttpServletRequest request, @RequestBody Attachment attachment) throws FileNotFoundException, IOException {
         JsonObject jsonObject = new JsonObject();
         final String authorization = request.getHeader("Authorization");
         if (authorization != null && authorization.toLowerCase().startsWith("basic")) {
@@ -61,6 +64,8 @@ public class AttachmentController {
                                 attachmentNew.setUrl(attachment.getUrl());
                                 attachmentNew.setTransaction(trans);
                                 attachmentDAO.save(attachmentNew);
+                                boolean isAttached = AttachmentUtility.devDownloadImage(attachment.getUrl());
+
                                 jsonObject.addProperty("message", "File attached successfully");
                                 return ResponseEntity.status(HttpStatus.OK).body(jsonObject.toString());
                             } else {
