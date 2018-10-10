@@ -25,10 +25,13 @@ public class Attachment {
 
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "transactionid", nullable = false)
+    @JoinColumn(name = "id", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JsonIgnore
     private Transaction transaction;
+
+    public Attachment() {
+    }
 
     public String getAttachmentid() {
         return attachmentid;
