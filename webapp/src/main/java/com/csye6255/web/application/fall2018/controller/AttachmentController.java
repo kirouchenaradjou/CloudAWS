@@ -9,6 +9,8 @@ import com.csye6255.web.application.fall2018.pojo.User;
 import com.csye6255.web.application.fall2018.utilities.AttachmentUtility;
 import com.csye6255.web.application.fall2018.utilities.AuthorizationUtility;
 import com.google.gson.JsonObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -16,18 +18,22 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.*;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+
 
 /**
  * @author rkirouchenaradjou
  */
 @Controller
 public class AttachmentController {
+    private final static Logger logger = LoggerFactory.getLogger(AttachmentController.class);
 
     @Autowired
     UserDAO userDao;
@@ -38,11 +44,10 @@ public class AttachmentController {
     @Autowired
     AttachmentDAO attachmentDAO;
 
-    @RequestMapping(value = "/transaction/{transactionid}/attachments", method = RequestMethod.POST, produces = {"application/json"},
-            consumes = "application/json", headers = {"content-type=application/json; charset=utf-8"})
+    @RequestMapping(value = "/transaction/{transactionid}/attachments", method = RequestMethod.POST, produces = {"application/json"})
     @ResponseBody
     public ResponseEntity attachFilesToTransaction(@PathVariable("transactionid") String transactionid,
-                                                   HttpServletRequest request, @RequestBody Attachment attachment) throws FileNotFoundException, IOException {
+                                                   HttpServletRequest request, @RequestParam("uploadReceipt") MultipartFile uploadReceiptFile) throws FileNotFoundException, IOException {
         JsonObject jsonObject = new JsonObject();
         final String authorization = request.getHeader("Authorization");
         if (authorization != null && authorization.toLowerCase().startsWith("basic")) {
@@ -59,23 +64,48 @@ public class AttachmentController {
                     if (transactionList.size() != 0) {
                         Transaction trans = transactionList.get(0);
                         if (trans.getUser().getId() == user.getId()) {
-                            if (attachment.getUrl() != null)  {
-                                Attachment attachmentNew = new Attachment();
-                                attachmentNew.setUrl(attachment.getUrl());
-                                attachmentNew.setTransaction(trans);
-                                attachmentDAO.save(attachmentNew);
-                                boolean isAttached = AttachmentUtility.devDownloadImage(attachment.getUrl());
-
-                                jsonObject.addProperty("message", "File attached successfully");
-                                return ResponseEntity.status(HttpStatus.OK).body(jsonObject.toString());
-                            } else {
-                                jsonObject.addProperty("message", "File could not be attached successfully - Please provide a url");
-                                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(jsonObject.toString());
+                            if (uploadReceiptFile.isEmpty()) {
+                                logger.error("attachFilesToTransaction Method : No file to upload");
                             }
+                            String path = System.getProperty("user.dir") + "/images";		//Absolute Project Path
+                            logger.info(path);
+                            if (!uploadReceiptFile.isEmpty()) {
+                                String filename = uploadReceiptFile.getOriginalFilename();
+                                String suffix = filename.substring(filename.lastIndexOf(".") + 1).toLowerCase();
+                                String filePath = path + "/";
+                                String newFileName = System.currentTimeMillis() + "." + suffix;
+                                if (!suffix.equals("png") && !suffix.equals("jpg") && !suffix.equals("jpeg")) {
+                                    String errMsg = "Please upload image file( supported type: *.pgn/*.jpeg/*.jpg )";
+                                    logger.info(errMsg);
+                                } else {
+                                    try {
+                                        logger.info(filePath + newFileName);
+                                        uploadReceiptFile.transferTo(new File(filePath, newFileName));
+                                        // Storing meta data in the DB: MSQL
+                                        Attachment attachmentNew = new Attachment();
+                                        attachmentNew.setUrl(filePath + newFileName);
+                                        attachmentNew.setTransaction(trans);
+                                        attachmentDAO.save(attachmentNew);
+                                        jsonObject.addProperty("message", "File attached successfully");
+
+                                        return ResponseEntity.status(HttpStatus.OK).body(jsonObject.toString());
+
+                                    } catch (Exception ex) {
+                                        jsonObject.addProperty("message", "Error while storing in local storage "+ex.getMessage());
+                                        logger.error("attachFilesToTransaction Method : exception" +ex.getMessage());
+
+                                        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(jsonObject.toString());
+
+                                    }
+                                }
+                            } else
+                                return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
                         } else
-                            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
-                    } else
-                        return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+                            return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
+                    } else {
+                        jsonObject.addProperty("message", "No transaction found for the user");
+                        return ResponseEntity.status(HttpStatus.OK).body(jsonObject.toString());
+                    }
                 } else {
                     jsonObject.addProperty("message", "Incorrect Password");
                     return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(jsonObject.toString());
@@ -84,10 +114,12 @@ public class AttachmentController {
                 jsonObject.addProperty("message", "User not found! - Try Logging in again");
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(jsonObject.toString());
             }
-        } else {
+        }
+        else {
             jsonObject.addProperty("message", "You are not logged in - Provide Username and Password!");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(jsonObject.toString());
         }
+        return null;
     }
 
     @RequestMapping(value = "/transaction/{transactionid}/attachments", method = RequestMethod.GET, produces = "application/json")

@@ -8,7 +8,7 @@ public class AttachmentUtility {
 
         URL url = new URL(sourceUrl);
         String fileName = url.getFile();
-        String basePath = "/home/menitakoonani/csye6225/app/csye6225-fall2018/webapp/src/main/java/com/csye6255/web/application/fall2018/images/";
+        String basePath = "/home/raghavikirouchenaradjou/csye6225/dev/csye6225-fall2018/webapp/src/main/java/com/csye6255/web/application/fall2018/images/";
         String destName = basePath + fileName.substring(fileName.lastIndexOf("/") + 1);
 
         InputStream is = url.openStream();

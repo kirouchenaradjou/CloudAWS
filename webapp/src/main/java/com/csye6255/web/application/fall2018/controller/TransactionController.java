@@ -135,12 +135,11 @@ public class TransactionController {
                         t.setCategory(transaction.getCategory());
                         t.setUser(user);
                         transactionDAO.save(t);
-
-                        attachment.setUrl(transaction.getAttachments().get(0).getUrl());
-                        attachment.setTransaction(t);
-
-                        attachmentDAO.save(attachment);
-
+                        if(transaction.getAttachments()!=null) {
+                            attachment.setUrl(transaction.getAttachments().get(0).getUrl());
+                            attachment.setTransaction(t);
+                            attachmentDAO.save(attachment);
+                        }
                         jsonObject.addProperty("message", "Transaction  Successful");
                         return ResponseEntity.status(HttpStatus.CREATED).body(jsonObject.toString());
                     } else {
