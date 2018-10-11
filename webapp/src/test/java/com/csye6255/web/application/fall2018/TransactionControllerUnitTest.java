@@ -1,21 +1,17 @@
 package com.csye6255.web.application.fall2018;
 
-import com.csye6255.web.application.fall2018.controller.TransactionController;
 import com.csye6255.web.application.fall2018.controller.UserController;
 import com.csye6255.web.application.fall2018.dao.TransactionDAO;
 import com.csye6255.web.application.fall2018.dao.UserDAO;
 import com.csye6255.web.application.fall2018.pojo.User;
-import com.csye6255.web.application.fall2018.utilities.AuthorizationUtility;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
@@ -30,16 +26,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.when;
 
 /**
  * @author rkirouchenaradjou
  */
 @RunWith(SpringRunner.class)
-@WebMvcTest(value = TransactionController.class, secure = false)
+@WebMvcTest(value = UserController.class, secure = false)
 public class TransactionControllerUnitTest {
     @Autowired
     private MockMvc mockMvc;
