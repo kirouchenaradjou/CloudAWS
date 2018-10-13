@@ -186,7 +186,7 @@ public class S3Controller {
                                                 //s3.putObject(new PutObjectRequest(bucketName, keyValue[1], newFileName));
                                                 s3.putObject(new PutObjectRequest(bucketName, keyValue[1], is, new ObjectMetadata()).withCannedAcl(CannedAccessControlList.PublicRead));
                                                 // Storing meta data in the DB: MSQL
-                                                String newUrl=S3BucketUtility.productRetrieveFileFromS3("",newFileName,bucketName);
+                                                String newUrl=S3BucketUtility.productRetrieveFileFromS3("",keyValue[1],bucketName);
                                                 attachment1.setUrl(newUrl);
                                                 attachmentDAO.save(attachment1);
                                             }
