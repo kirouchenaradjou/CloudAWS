@@ -158,38 +158,39 @@ public class S3Controller {
                         Transaction trans = transactionList.get(0);
                         if (trans.getUser().getId() == user.getId()) {
                             List<Attachment> attachmentList = attachmentDAO.findAttachmentByAttachmentid(attachmentid);
-                            if (attachmentList.size() != 0) {
-                                Attachment attachment = attachmentList.get(0);
-                                try {
-                                    if (attachment.getUrl()!=null) {
-                                        String[] value =attachment.getUrl().split("/"+bucketName);
-                                        String[] keyValue = value[1].split("/");
-                                        AmazonS3 s3client = AmazonS3ClientBuilder.standard().build();
-                                        String toDelete = "";
-                                        for(S3ObjectSummary summary: S3Objects.inBucket(s3client, bucketName)){
-                                            String imageName = summary.getKey();
-                                            int i = imageName.lastIndexOf('.');
-                                            String ownerName = imageName.substring(0, i);
-                                            if(ownerName.equals(keyValue[1])){
-                                                toDelete = imageName;
-                                                break;
-                                            }
-                                        }
-                                        if(!toDelete.equals("")){
-                                            s3client.deleteObject(bucketName, toDelete);
-                                        }
-                                        attachmentDAO.delete(attachment);
-                                        jsonObject.addProperty("message", "File deleted successfully");
-                                        return ResponseEntity.status(HttpStatus.OK).body(jsonObject.toString());
-                                    } else {
-                                        logger.error("deleteAttachment Method : No file to delete");
-                                    }
-                                } catch (Exception ex) {
-                                    jsonObject.addProperty("message", "Error while storing in local storage " + ex.getMessage());
-                                    logger.error("deleteAttachment Method : exception" + ex.getMessage());
 
-                                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(jsonObject.toString());
+                            if (attachmentList.size() != 0) {
+                                for(Attachment attachment : attachmentList) {
+                                    try {
+                                        if (attachment.getUrl()!=null) {
+                                            String[] value =attachment.getUrl().split("/"+bucketName);
+                                            String[] keyValue = value[1].split("/");
+                                            AmazonS3 s3client = AmazonS3ClientBuilder.standard().build();
+                                            String toDelete = "";
+                                            for(S3ObjectSummary summary: S3Objects.inBucket(s3client, bucketName)){
+                                                String imageName = summary.getKey();
+                                                if(imageName.equals(keyValue[1])){
+                                                    toDelete = imageName;
+                                                    attachmentDAO.delete(attachment);
+                                                    break;
+                                                }
+                                            }
+                                            if(!toDelete.equals("")){
+                                                s3client.deleteObject(bucketName, toDelete);
+                                            }
+                                            jsonObject.addProperty("message", "File deleted successfully");
+                                            return ResponseEntity.status(HttpStatus.OK).body(jsonObject.toString());
+                                        } else {
+                                            logger.error("deleteAttachment Method : No file to delete");
+                                        }
+                                    } catch (Exception ex) {
+                                        jsonObject.addProperty("message", "Error while storing in local storage " + ex.getMessage());
+                                        logger.error("deleteAttachment Method : exception" + ex.getMessage());
+
+                                        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(jsonObject.toString());
+                                    }
                                 }
+
 
                             } else {
                                 jsonObject.addProperty("message", "No attachments found to delete");
