@@ -4,7 +4,7 @@
 			"Parameters": {
 				"EC2Name": {
 					"Type": "String"
-					},
+				},
 				"EC2SecurityGroup": {
 					"Type": "String"
 				},
@@ -21,6 +21,39 @@
 					"Type":"String"
 				},
 				"AMIImage":{
+					"Type":"String"
+				},
+				"DynamoDBName":{
+					"Type":"String"
+				},
+				"BucketName":{
+					"Type":"String"
+				},
+				"MasterUsername":{
+					"Type":"String"
+				},
+				"MasterUserPwd":{
+					"Type":"String"
+				},
+				"DBName":{
+					"Type":"String"
+				},
+				"DBInstanceClass":{
+					"Type":"String"
+				},
+				"DBInstanceIdentifier":{
+					"Type":"String"
+				},
+				"DBEngine":{
+					"Type":"String"
+				},
+				"SubnetId2":{
+					"Type" : "String"
+				},
+				"SubnetId3":{
+					"Type":"String"
+				},
+				"RDSSecurityGroup":{
 					"Type":"String"
 				}
 			},
@@ -49,57 +82,101 @@
 						"Tags" : [
 							{
 								"Key" : "Name",
-								"Value" : {"Ref":"EC2Name"}
+								"Value" : "app-csye6225-ec2"
 							}
 						],
 						"SecurityGroupIds" : [{
 							"Ref" : "EC2SecurityGroup"
-
 						}],
 						"SubnetId" : {
 							"Ref":"SubnetId1"
 						}
 					}
 				},
-				"WebServerSecurityGroup" : {
-					"Type" : "AWS::EC2::SecurityGroup",
+				"ourDynamoTable": {
+					"Type" : "AWS::DynamoDB::Table",
 					"Properties" : {
-						"GroupName" : "csye6225-webapp",
-						"GroupDescription" : "Access to ports 22, 80 & 443",
-						"VpcId": {"Ref":"VpcId"},
-						"SecurityGroupIngress" : [ {
-							"IpProtocol" : "tcp",
-							"FromPort" : "22",
-							"ToPort" : "22",
-						"CidrIp" : "0.0.0.0/0" },
-						{
-							"IpProtocol" : "tcp",
-							"FromPort" : "80",
-							"ToPort" : "80",
-						"CidrIp" : "0.0.0.0/0" },
-						{
-							"IpProtocol" : "tcp",
-							"FromPort" : "443",
-							"ToPort" : "443",
-							"CidrIp" : "0.0.0.0/0"
-						} ]
+						"KeySchema": [
+							{
+								"AttributeName": "id",
+								"KeyType": "HASH"
+							}
+						],
+						"AttributeDefinitions": [
+							{
+								"AttributeName": "id",
+								"AttributeType": "S"
+							}
+						],
+						"TableName": {
+							"Ref": "DynamoDBName"
+						},
+						"ProvisionedThroughput":{
+							"ReadCapacityUnits": "5",
+							"WriteCapacityUnits": "5"
+						}
 					}
 				},
-				"DBEC2SecurityGroup": {
-					"Type": "AWS::EC2::SecurityGroup",
+				"ourS3Bucket":{
+					"Type" : "AWS::S3::Bucket",
+					"Description":"S3 Bucket to store attachment files",
 					"Properties" : {
-						"GroupName": "csye6225-rds",
-						"GroupDescription": "Open database for access",
-						"SecurityGroupIngress" : [{
-							"IpProtocol" : "tcp",
-							"FromPort" : "3306",
-							"ToPort" : "3306",
-							"SourceSecurityGroupId" : { "Ref" : "EC2SecurityGroup" }
-						}],
-						"VpcId": {"Ref":"VpcId"}
+						"AccessControl" : "Private",
+						"BucketName":{
+							"Ref":"BucketName"
+						}
 					}
 
+				},
+				"myRDSDBSubnet": {
+					"Type": "AWS::RDS::DBSubnetGroup",
+					"Properties": {
+						"DBSubnetGroupDescription": "Subnet Group fro RDS Instance",
+						"SubnetIds": [
+							{
+								"Ref": "SubnetId2"
+							},
+							{
+								"Ref": "SubnetId3"
+							}
+						]
+					}
+				},
+				"ourRDSInstance":
+				{
+					"Type" : "AWS::RDS::DBInstance",
+					"Properties" :
+					{	
+						"AllocatedStorage": "10",
+						"MasterUsername" : {
+							"Ref":"MasterUsername"
+						},
+						"MasterUserPassword" : {
+							"Ref":"MasterUserPwd"
+						},
+						"MultiAZ" : false,
+						"PubliclyAccessible" : false,
+						"DBName": {
+							"Ref": "DBName"
+						},
+						"DBInstanceClass": {
+							"Ref": "DBInstanceClass"
+						},
+						"DBInstanceIdentifier": {
+							"Ref": "DBInstanceIdentifier"
+						},
+						"Engine": {
+							"Ref": "DBEngine"
+						},
+						"DBSubnetGroupName": {
+							"Ref": "myRDSDBSubnet"
+						},
+						"VPCSecurityGroups": [
+							{
+								"Ref": "RDSSecurityGroup"
+							}
+						]
+					}
 				}
-
 			}
-		}
+}
