@@ -91,8 +91,6 @@ public class S3Controller {
                                     try {
                                         String path = System.getProperty("user.dir") + "/images";
                                         String filePath = path + "/";
-                                        uploadReceiptFile.transferTo(new File(filePath, newFileName));
-
                                         InputStream is = uploadReceiptFile.getInputStream();
                                         String bucketName = "haha.me.csye6225.com";
                                         s3.putObject(new PutObjectRequest(bucketName, newFileName, is, new ObjectMetadata()).withCannedAcl(CannedAccessControlList.PublicRead));

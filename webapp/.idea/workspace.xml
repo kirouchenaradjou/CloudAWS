@@ -2,13 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="014be036-1092-45e2-8506-5e067dabe4e5" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/csye6255/web/application/fall2018/utilities/S3BucketUtility.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fall2018.iml" beforeDir="false" afterPath="$PROJECT_DIR$/fall2018.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/../.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/csye6255/web/application/fall2018/controller/S3Controller.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/csye6255/web/application/fall2018/controller/S3Controller.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/csye6255/web/application/fall2018/utilities/AttachmentUtility.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/1539201770002.jpeg" beforeDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/target/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -81,8 +76,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/main/java/com/csye6255/web/application/fall2018/controller/S3Controller.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-321">
-              <caret line="100" selection-start-line="100" selection-end-line="100" />
+            <state relative-caret-position="211">
+              <caret line="92" column="55" selection-start-line="92" selection-start-column="47" selection-end-line="92" selection-end-column="55" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -208,8 +203,8 @@
         <option value="$PROJECT_DIR$/src/main/java/com/csye6255/web/application/fall2018/controller/CommonController.java" />
         <option value="$PROJECT_DIR$/src/main/java/com/csye6255/web/application/fall2018/controller/UserController.java" />
         <option value="$PROJECT_DIR$/pom.xml" />
-        <option value="$PROJECT_DIR$/src/main/java/com/csye6255/web/application/fall2018/controller/S3Controller.java" />
         <option value="$PROJECT_DIR$/src/main/java/com/csye6255/web/application/fall2018/utilities/S3BucketUtility.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/csye6255/web/application/fall2018/controller/S3Controller.java" />
       </list>
     </option>
   </component>
@@ -359,7 +354,7 @@
     <property name="RequestMappingsPanelWidth1" value="75" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="aspect.path.notification.shown" value="true" />
-    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1539392947775" />
+    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1539393061356" />
     <property name="extract.method.default.visibility" value="public" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
@@ -450,7 +445,7 @@
       <updated>1538075146100</updated>
       <workItem from="1538075156141" duration="390000" />
       <workItem from="1539180193207" duration="13347000" />
-      <workItem from="1539382439175" duration="5316000" />
+      <workItem from="1539382439175" duration="5586000" />
     </task>
     <servers />
   </component>
@@ -460,7 +455,7 @@
     </history-entry>
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="31211000" />
+    <option name="totallyTimeSpent" value="31481000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -473,6 +468,7 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="27" width="1440" height="873" extended-state="6" />
+    <editor active="true" />
     <layout>
       <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.30387932" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
@@ -486,12 +482,12 @@
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.32968536" />
       <window_info anchor="bottom" id="Run" order="2" weight="0.32968536" />
-      <window_info active="true" anchor="bottom" id="Debug" order="3" visible="true" weight="0.3994528" />
+      <window_info anchor="bottom" id="Debug" order="3" weight="0.3994528" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" weight="0.32968536" />
       <window_info anchor="bottom" id="Spring" order="7" weight="0.32968536" />
-      <window_info anchor="bottom" id="Terminal" order="8" weight="0.33105335" />
+      <window_info active="true" anchor="bottom" id="Terminal" order="8" visible="true" weight="0.33105335" />
       <window_info anchor="bottom" id="Event Log" order="9" side_tool="true" />
       <window_info anchor="bottom" id="Java Enterprise" order="10" />
       <window_info anchor="bottom" id="Database Changes" order="11" show_stripe_button="false" />
@@ -567,7 +563,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/main/java/com/csye6255/web/application/fall2018/controller/S3Controller.java</url>
-          <line>97</line>
+          <line>95</line>
           <properties />
           <option name="timeStamp" value="30" />
         </line-breakpoint>
@@ -804,8 +800,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/com/csye6255/web/application/fall2018/controller/S3Controller.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-321">
-          <caret line="100" selection-start-line="100" selection-end-line="100" />
+        <state relative-caret-position="211">
+          <caret line="92" column="55" selection-start-line="92" selection-start-column="47" selection-end-line="92" selection-end-column="55" />
           <folding>
             <element signature="imports" expanded="true" />
           </folding>
