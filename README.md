@@ -60,7 +60,11 @@ payload: {
   "merchant": "starbucks",
   "amount": 2.69,
   "date": "09/25/2018",
-  "category": "food"
+  "category": "food",
+  "attachments": {
+    "id": "ff87c898-efc4-48ae-83db-fd36aff86c18",
+    "url": "https://bucket.me.csye6225.com.s3.amazonaws.com/1539450197747.jpeg"
+  }
 }
 
 Response : 
@@ -78,7 +82,11 @@ payload: {
   "merchant": "starbucks",
   "amount": 2.69,
   "date": "09/25/2018",
-  "category": "food"
+  "category": "food",
+  "attachments": {
+    "id": "ff87c898-efc4-48ae-83db-fd36aff86c18",
+    "url": "https://bucket.me.csye6225.com.s3.amazonaws.com/1539450197747.jpeg"
+  }
 }
 
 Response : 
@@ -124,7 +132,11 @@ Response :
         "merchant": "2.69",
         "amount": "09/25/2018",
         "date": "starbucks",
-        "category": "food"
+        "category": "food",
+        "attachments": {
+            "id": "ff87c898-efc4-48ae-83db-fd36aff86c18",
+            "url": "https://bucket.me.csye6225.com.s3.amazonaws.com/1539450197747.jpeg"
+        }
     },
     {
         "id": "c411c9c5-7a2e-44df-9871-bb473bb7bcd0",
@@ -132,7 +144,11 @@ Response :
         "merchant": "2.69",
         "amount": "09/25/2018",
         "date": "starbucks",
-        "category": "food"
+        "category": "food",
+        "attachments": {
+            "id": "ff87c898-efc4-48ae-83db-fd36aff86c18",
+            "url": "https://bucket.me.csye6225.com.s3.amazonaws.com/1539450197747.jpeg"
+        }
     }
 ]
 
@@ -166,7 +182,11 @@ Response (updated payload):
     "merchant": "2.69",
     "amount": "09/25/2018",
     "date": "kungfu",
-    "category": "food"
+    "category": "food",
+    "attachments": {
+        "id": "ff87c898-efc4-48ae-83db-fd36aff86c18",
+        "url": "https://bucket.me.csye6225.com.s3.amazonaws.com/1539450197747.jpeg"
+    }
 }
 
 http://localhost:8080/transaction/{transactionid} {where trsnactionID = Invalid}
@@ -174,12 +194,16 @@ authorization : Basic dXNlcjFAZ21haWwuY29tOnVzZXI= (valid user)
 method : put
 status code: 400 bad request
 payload: {
-  "id": "d290f1ee-6c54-4b01-90e6-999999999999",
-  "description": "coffee",
-  "merchant": "starbucks",
-  "amount": 2.69,
-  "date": "09/25/2018",
-  "category": "food"
+    "id": "a943b525-6d7e-4df0-85f9-169cb09a5795",
+    "description": "tea",
+    "merchant": "2.69",
+    "amount": "09/25/2018",
+    "date": "kungfu",
+    "category": "food",
+    "attachments": {
+        "id": "ff87c898-efc4-48ae-83db-fd36aff86c18",
+        "url": "https://bucket.me.csye6225.com.s3.amazonaws.com/1539450197747.jpeg"
+    }
 }
 
 Response:
@@ -240,6 +264,7 @@ http://localhost:8080/transaction/{transactionid}/attachments/{attachmentid}
 authorization : Basic dXNlcjFAZ21haWwuY29tOnVzZXI= (valid user)
 method: PUT
 status code: 200 OK
+payload: Multipart form-data with key = uploadReceipt and key = .png/.jpeg/.jpg image file to upload
 response:
 {
     "message": "File updated successfully"
