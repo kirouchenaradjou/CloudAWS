@@ -29,6 +29,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -136,6 +137,93 @@ public class S3Controller {
             }
         }
 
+    @RequestMapping(value = "/transaction/{transactionid}/attachments/{attachmentid}", method = RequestMethod.PUT, produces = {"application/json"})
+    @ResponseBody
+    public ResponseEntity replaceAttachmentInTransaction(@PathVariable("transactionid") String transactionid,
+                                            @PathVariable("attachmentid") String attachmentid, HttpServletRequest request,
+                                            @RequestParam("uploadReceipt") MultipartFile uploadReceiptFile) throws FileNotFoundException, IOException {
+        JsonObject jsonObject = new JsonObject();
+        final String authorization = request.getHeader("Authorization");
+        if (authorization != null && authorization.toLowerCase().startsWith("basic")) {
+            String[] values = AuthorizationUtility.getHeaderValues(authorization);
+            String userName = values[0];
+            String password = values[1];
+            BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+            List<User> userList = userDao.findByUserName(userName);
+
+            if (userList.size() != 0) {
+                User user = userList.get(0);
+                if (encoder.matches(password, user.getPassword())) {
+                    List<Transaction> transactionList = transactionDAO.findByTransactionid(transactionid);
+                    if (transactionList.size() != 0) {
+                        Transaction trans = transactionList.get(0);
+                        if (trans.getUser().getId() == user.getId()) {
+                            if (uploadReceiptFile.isEmpty()) {
+                                logger.error("replaceAttachmentInTransaction Method : No file to upload");
+                            }
+                            if (!uploadReceiptFile.isEmpty()) {
+                                String filename = uploadReceiptFile.getOriginalFilename();
+                                String suffix = filename.substring(filename.lastIndexOf(".") + 1).toLowerCase();
+                                String newFileName = System.currentTimeMillis() + "." + suffix;
+                                if (!suffix.equals("png") && !suffix.equals("jpg") && !suffix.equals("jpeg")) {
+                                    String errMsg = "Please upload image file( supported type: *.png/*.jpeg/*.jpg )";
+                                    logger.info(errMsg);
+                                    jsonObject.addProperty("message", errMsg);
+                                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(jsonObject.toString());
+
+                                } else {
+                                    AmazonS3 s3 = AmazonS3ClientBuilder.standard().build();
+                                    List<Attachment> attachmentList = attachmentDAO.findByTransaction(trans);
+
+                                    try {
+
+                                        for (Attachment attachment1 : attachmentList) {
+                                            if (attachment1.getAttachmentid().equals(attachmentid)) {
+                                                InputStream is = uploadReceiptFile.getInputStream();
+                                                String bucketName = "haha.me.csye6225.com";
+                                                String[] value =attachment1.getUrl().split("/"+bucketName);
+                                                String[] keyValue = value[1].split("/");
+                                                //s3.putObject(new PutObjectRequest(bucketName, keyValue[1], newFileName));
+                                                s3.putObject(new PutObjectRequest(bucketName, keyValue[1], is, new ObjectMetadata()).withCannedAcl(CannedAccessControlList.PublicRead));
+                                                // Storing meta data in the DB: MSQL
+                                                String newUrl=S3BucketUtility.productRetrieveFileFromS3("",newFileName,bucketName);
+                                                attachment1.setUrl(newUrl);
+                                                attachmentDAO.save(attachment1);
+                                            }
+                                        }
+                                           } catch (AmazonServiceException e) {
+                                        System.err.println(e.getErrorMessage());
+                                        jsonObject.addProperty("message", e.getErrorMessage());
+                                        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(jsonObject.toString());
+                                    }
+                                }
+                            } else
+                                return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
+                        } else {
+                            jsonObject.addProperty("message", "No transaction found for the user");
+                            return ResponseEntity.status(HttpStatus.OK).body(jsonObject.toString());
+                        }
+                    } else {
+                        jsonObject.addProperty("message", "Incorrect Password");
+                        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(jsonObject.toString());
+                    }
+                } else {
+                    jsonObject.addProperty("message", "User not found! - Try Logging in again");
+                    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(jsonObject.toString());
+                }
+            } else {
+                jsonObject.addProperty("message", "You are not logged in - Provide Username and Password!");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(jsonObject.toString());
+            }
+            jsonObject.addProperty("message", "Attachment Not Found");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(jsonObject.toString());
+        }
+        else {
+            jsonObject.addProperty("message", "You are not logged in - Provide Username and Password!");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(jsonObject.toString());
+        }
+    }
+
     @RequestMapping(value = "/transaction/{transactionid}/attachments/{attachmentid}", method = RequestMethod.DELETE, produces = {"application/json"})
     @ResponseBody
     public ResponseEntity deleteAttachment(@PathVariable("transactionid") String transactionid,
@@ -219,91 +307,5 @@ public class S3Controller {
         jsonObject.addProperty("message", "Attachment Not Found");
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(jsonObject.toString());
     }
-    /*
-    *
-    * Transaction Operation
-    *
-     */
-    @RequestMapping(value = "/transaction", method = RequestMethod.POST, produces = {"application/json"} , consumes = {"multipart/form-data"})
-    @ResponseBody
-    public ResponseEntity createTransaction(HttpServletRequest request, @RequestParam("uploadReceipt") MultipartFile uploadReceiptFile, @RequestBody Transaction transaction) throws FileNotFoundException, IOException {
-        JsonObject jsonObject = new JsonObject();
-        final String authorization = request.getHeader("Authorization");
-        if (authorization != null && authorization.toLowerCase().startsWith("basic")) {
-            String[] values = AuthorizationUtility.getHeaderValues(authorization);
-            String userName = values[0];
-            String password = values[1];
-            BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-            List<User> userList = userDao.findByUserName(userName);
-
-            if (userList.size() != 0) {
-                User user = userList.get(0);
-                if (encoder.matches(password, user.getPassword())) {
-                    if (transaction.getDescription() != null && transaction.getAmount() != null
-                            && transaction.getDate() != null && transaction.getMerchant() != null && uploadReceiptFile.isEmpty() && transaction.getCategory() != null) {
-                        Transaction t = new Transaction();
-                        t.setTransactionid(transaction.getTransactionid());
-                        t.setDescription(transaction.getDescription());
-                        t.setAmount(transaction.getAmount());
-                        t.setDate(transaction.getDate());
-                        t.setMerchant(transaction.getMerchant());
-                        t.setCategory(transaction.getCategory());
-                        t.setUser(user);
-                        transactionDAO.save(t);
-                        if (!uploadReceiptFile.isEmpty()) {
-                            String filename = uploadReceiptFile.getOriginalFilename();
-                            String suffix = filename.substring(filename.lastIndexOf(".") + 1).toLowerCase();
-                            String newFileName = System.currentTimeMillis() + "." + suffix;
-                            if (!suffix.equals("png") && !suffix.equals("jpg") && !suffix.equals("jpeg")) {
-                                String errMsg = "Please upload image file( supported type: *.png/*.jpeg/*.jpg )";
-                                logger.info(errMsg);
-                                jsonObject.addProperty("message", errMsg);
-                                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(jsonObject.toString());
-
-                            } else {
-                                AmazonS3 s3 = AmazonS3ClientBuilder.standard().build();
-                                try {
-                                    String path = System.getProperty("user.dir") + "/images";
-                                    String filePath = path + "/";
-                                    InputStream is = uploadReceiptFile.getInputStream();
-                                    String bucketName = "haha.me.csye6225.com";
-                                    s3.putObject(new PutObjectRequest(bucketName, newFileName, is, new ObjectMetadata()).withCannedAcl(CannedAccessControlList.PublicRead));
-                                    String url=S3BucketUtility.productRetrieveFileFromS3("",newFileName,bucketName);
-                                    // Storing meta data in the DB: MSQL
-                                    Attachment attachmentNew = new Attachment();
-                                    attachmentNew.setTransaction(t);
-                                    attachmentNew.setUrl(url);
-                                    attachmentDAO.save(attachmentNew);
-                                    jsonObject.addProperty("message", "Transaction  Successful");
-                                    return ResponseEntity.status(HttpStatus.CREATED).body(jsonObject.toString());
-                                } catch (AmazonServiceException e) {
-                                    System.err.println(e.getErrorMessage());
-                                    jsonObject.addProperty("message", e.getErrorMessage());
-                                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(jsonObject.toString());
-                                }
-                            }
-                        } else {
-                            jsonObject.addProperty("message", "Upload Recepiet file is empty!!!");
-                            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(jsonObject.toString());
-                        }
-                         } else {
-
-                        jsonObject.addProperty("message", "Transaction desc ,category , upload file shouldnt be empty");
-                        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(jsonObject.toString());
-
-
-                    } } else {
-                    jsonObject.addProperty("message", "Incorrect Password");
-                    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(jsonObject.toString());
-                }
-                    }else{
-                        jsonObject.addProperty("message", "No transaction found for the user");
-                        return ResponseEntity.status(HttpStatus.OK).body(jsonObject.toString());
-                    }
-                } else {
-                    jsonObject.addProperty("message", "Incorrect Password");
-                    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(jsonObject.toString());
-                }
-            }
 
 }
