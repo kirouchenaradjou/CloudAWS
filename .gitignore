@@ -109,4 +109,5 @@ venv.bak/
 #idea_files
 webapp/.idea/workspace.xml
 webapp/fall2018.iml
-
+.idea/
+fall2018.iml
