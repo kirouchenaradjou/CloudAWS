@@ -21,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -52,6 +53,10 @@ public class S3Controller {
 
     @Autowired
     AttachmentDAO attachmentDAO;
+
+    @Autowired
+    private Environment env;
+
 
     @RequestMapping(value = "/transaction/{transactionid}/attachments", method = RequestMethod.POST, produces = {"application/json"})
     @ResponseBody
@@ -94,9 +99,8 @@ public class S3Controller {
                                         String path = System.getProperty("user.dir") + "/images";
                                         String filePath = path + "/";
                                         InputStream is = uploadReceiptFile.getInputStream();
-                                        String bucketName = "haha.me.csye6225.com";
-                                        s3.putObject(new PutObjectRequest(bucketName, newFileName, is, new ObjectMetadata()).withCannedAcl(CannedAccessControlList.PublicRead));
-                                        String url=S3BucketUtility.productRetrieveFileFromS3("",newFileName,bucketName);
+                                        s3.putObject(new PutObjectRequest(env.getProperty("bucket.name"), newFileName, is, new ObjectMetadata()).withCannedAcl(CannedAccessControlList.PublicRead));
+                                        String url=S3BucketUtility.productRetrieveFileFromS3("",newFileName,env.getProperty("bucket.name"));
                                         // Storing meta data in the DB: MSQL
                                         Attachment attachmentNew = new Attachment();
                                         attachmentNew.setTransaction(trans);
@@ -180,13 +184,12 @@ public class S3Controller {
                                         for (Attachment attachment1 : attachmentList) {
                                             if (attachment1.getAttachmentid().equals(attachmentid)) {
                                                 InputStream is = uploadReceiptFile.getInputStream();
-                                                String bucketName = "haha.me.csye6225.com";
-                                                String[] value =attachment1.getUrl().split("/"+bucketName);
+                                                String[] value =attachment1.getUrl().split("/"+env.getProperty("bucket.name"));
                                                 String[] keyValue = value[1].split("/");
-                                                //s3.putObject(new PutObjectRequest(bucketName, keyValue[1], newFileName));
-                                                s3.putObject(new PutObjectRequest(bucketName, keyValue[1], is, new ObjectMetadata()).withCannedAcl(CannedAccessControlList.PublicRead));
+                                                //s3.putObject(new PutObjectRequest(env.getProperty("bucket.name"), keyValue[1], newFileName));
+                                                s3.putObject(new PutObjectRequest(env.getProperty("bucket.name"), keyValue[1], is, new ObjectMetadata()).withCannedAcl(CannedAccessControlList.PublicRead));
                                                 // Storing meta data in the DB: MSQL
-                                                String newUrl=S3BucketUtility.productRetrieveFileFromS3("",keyValue[1],bucketName);
+                                                String newUrl=S3BucketUtility.productRetrieveFileFromS3("",keyValue[1],env.getProperty("bucket.name"));
                                                 attachment1.setUrl(newUrl);
                                                 attachmentDAO.save(attachment1);
                                             }
@@ -238,7 +241,6 @@ public class S3Controller {
             List<User> userList = userDao.findByUserName(userName);
 
             if (userList.size() != 0) {
-                String bucketName = "haha.me.csye6225.com";
                 User user = userList.get(0);
                 if (encoder.matches(password, user.getPassword())) {
                     List<Transaction> transactionList = transactionDAO.findByTransactionid(transactionid);
@@ -251,11 +253,11 @@ public class S3Controller {
                                 for(Attachment attachment : attachmentList) {
                                     try {
                                         if (attachment.getUrl()!=null) {
-                                            String[] value =attachment.getUrl().split("/"+bucketName);
+                                            String[] value =attachment.getUrl().split("/"+env.getProperty("bucket.name"));
                                             String[] keyValue = value[1].split("/");
                                             AmazonS3 s3client = AmazonS3ClientBuilder.standard().build();
                                             String toDelete = "";
-                                            for(S3ObjectSummary summary: S3Objects.inBucket(s3client, bucketName)){
+                                            for(S3ObjectSummary summary: S3Objects.inBucket(s3client, env.getProperty("bucket.name"))){
                                                 String imageName = summary.getKey();
                                                 if(imageName.equals(keyValue[1])){
                                                     toDelete = imageName;
@@ -264,7 +266,7 @@ public class S3Controller {
                                                 }
                                             }
                                             if(!toDelete.equals("")){
-                                                s3client.deleteObject(bucketName, toDelete);
+                                                s3client.deleteObject(env.getProperty("bucket.name"), toDelete);
                                             }
                                             jsonObject.addProperty("message", "File deleted successfully");
                                             return ResponseEntity.status(HttpStatus.OK).body(jsonObject.toString());

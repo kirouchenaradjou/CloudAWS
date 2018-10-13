@@ -1,11 +1,11 @@
 # csye6225-fall2018
+# assignment4
 
 # Team Member Information:
 - Akilan Rajendiran         rajendiran.a@husky.neu.edu
 - Menita Koonani            koonani.m@husky.neu.edu
 - Neha Pednekar             pednekar.n@husky.neu.edu
 - Raghavi Kirouchenaradjou  kirouchenaradjou.r@husky.neu.edu 
-
 
 
 # Prerequisites for build and deployment of the web app
@@ -19,6 +19,8 @@
 - App must be imported in the IntelliJ and MySQL server must be configured to run the app.
 - The application.properties should be set on your local to match your MySQL password for the root user.
 - To run the Spring Boot application, click on the green run button on the top panel.
+- There will be two profiles, the dev profile to run the application on your local machine and aws profile to run the application in   AWS using S3 bucket utility
+- Set the profile in the 'Edit Configurations' by mentioning the profile name in the active profile textbox.
 
 # How to run the APi
 # Run it via either Postman or AdvancedRestClient 
@@ -210,6 +212,72 @@ authorization : No Auth
 method: delete
 status code: 401 Unauthorized
 
+http://localhost:8080/transaction/{transactionid}/attachments
+authorization : Basic dXNlcjFAZ21haWwuY29tOnVzZXI= (valid user)
+method: POST
+status code: 200 OK
+payload:
+Multipart form-data with key = uploadReceipt and key = .png/.jpeg/.jpg image file to upload
+
+response:
+{
+    "message": "File attached successfully"
+}
+
+http://localhost:8080/transaction/{transactionid}/attachments
+authorization : Basic dXNlcjFAZ21haWwuY29tOnVzZXI= (valid user)
+method: GET
+status code: 200 OK
+response:
+[
+    {
+        "id": "3839073c-ee96-4041-8ab5-3eef392a5218",
+        "url": "C:\\Users\\Neha Pednekar\\Downloads\\csye6225-fall2018-assignment4\\csye6225-fall2018-assignment4\\webapp\\images\\1539443528965.jpg"
+    }
+]
+
+http://localhost:8080/transaction/{transactionid}/attachments/{attachmentid}
+authorization : Basic dXNlcjFAZ21haWwuY29tOnVzZXI= (valid user)
+method: PUT
+status code: 200 OK
+response:
+{
+    "message": "File updated successfully"
+}
+
+http://localhost:8080/transaction/{transactionid}/attachments/{attachmentid}
+authorization : Basic dXNlcjFAZ21haWwuY29tOnVzZXI= (valid user)
+method: DELETE
+status code: 200 OK
+response:
+{
+    "message": "File deleted successfully"
+}
+
+# AWS Cloud formation Instructions
+
+# Setup requirements
+csye6225-aws-cf-create-stack.sh for cloudformation to create a VPC stack
+csye6225-aws-cf-terminate-stack.sh for cloudformation to terminate a VPC stack and clear resources
+csye6225-cf-networking.json for the networking setup template
+csye6225-aws-cf-create-application-stack.sh for cloudformation to create a Application stack
+csye6225-aws-cf-terminate-application-stack.sh for cloudformation to terminate a Apllication stack and clear resources
+csye6225-cf-application.json for the application setup template
+A shell terminal with AWS CLI configured
+
+Check if files have executing and read-write access, if not available please set the same
+
+Navigate to the folder containing the files using the terminal
+
+For creating stack run the following command with STACK_NAME(any name) as parameter ./csye6225-aws-cf-create-stack.sh STACK_NAME ./csye6225-aws-cf-create-application-stack.sh STACK_NAME 
+or
+sh csye6225-aws-cf-create-stack.sh STACK_NAME
+sh csye6225-aws-cf-create-application-stack.sh STACK_NAME
+
+For terminating stack run the following command with STACK_NAME(any name) as parameter ./csye6225-aws-cf-terminate-stack.sh STACK_NAME ./csye6225-aws-cf-terminate-application-stack.sh STACK_NAME 
+or 
+sh csye6225-aws-cf-terminate-stack.sh STACK_NAME
+sh csye6225-aws-cf-terminate-application-stack.sh STACK_NAME
 
 # Instructions to run Unit Test, Integration and Load tests
 
