@@ -105,3 +105,9 @@ venv.bak/
 
 #macos
 .DS_Store
+
+#idea_files
+webapp/.idea/workspace.xml
+webapp/fall2018.iml
+.idea/
+fall2018.iml
