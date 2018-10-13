@@ -45,73 +45,6 @@ public class UserController {
     @Autowired
     AttachmentDAO attachmentDAO;
 
-
-    @RequestMapping(value = "/transaction", method = RequestMethod.GET, produces = "application/json")
-    @ResponseBody
-    public ResponseEntity getTransactions(@RequestHeader HttpHeaders headers, HttpServletRequest request) {
-        final String authorization = request.getHeader("Authorization");
-        JsonObject jsonObject = new JsonObject();
-        if (authorization != null && authorization.toLowerCase().startsWith("basic")) {
-            String[] values = AuthorizationUtility.getHeaderValues(authorization);
-            String userName = values[0];
-            String password = values[1];
-            BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-            List<User> userList = userDao.findByUserName(userName);
-            List<JsonObject> jsonObjectList = new ArrayList<>();
-            Gson gson = new Gson();
-            if (userList.size() != 0) {
-                User user = userList.get(0);
-                if (encoder.matches(password, user.getPassword())) {
-                    List<Transaction> transactionList = transactionDAO.findByUserId(user.getId());
-                    if (((List) transactionList).size() != 0) {
-                        for (Transaction transaction : transactionList) {
-                            JsonObject jsonObject1 = new JsonObject();
-                            jsonObject1.addProperty("id", transaction.getTransactionid());
-                            jsonObject1.addProperty("description", transaction.getDescription());
-                            jsonObject1.addProperty("amount", transaction.getAmount());
-                            jsonObject1.addProperty("date", transaction.getDate());
-                            jsonObject1.addProperty("merchant", transaction.getMerchant());
-                            jsonObject1.addProperty("category", transaction.getCategory());
-                            List<Attachment> attachmentList = attachmentDAO.findByTransaction(transaction);
-                            JsonObject attachmentObj = new JsonObject();
-
-                            if (attachmentList.size() != 0) {
-                                for (Attachment attachment : attachmentList) {
-                                    attachmentObj.addProperty("id", attachment.getAttachmentid());
-                                    attachmentObj.addProperty("url", attachment.getUrl());
-                                }
-                            }
-                            JsonElement attachmentJsonElement = gson.toJsonTree(attachmentObj);
-                            jsonObject1.add("attachments", attachmentJsonElement);
-                            jsonObjectList.add(jsonObject1);
-                        }
-                        return ResponseEntity.status(HttpStatus.OK).body(jsonObjectList.toString());
-
-                    } else {
-                        jsonObject.addProperty("message", "There is no transactions to show");
-                        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(jsonObject.toString());
-                    }
-
-                } else {
-                    jsonObject.addProperty("message", "Incorrect Password");
-                    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(jsonObject.toString());
-                }
-
-
-            } else {
-                jsonObject.addProperty("message", "User not found! - Try Logging in again");
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(jsonObject.toString());
-            }
-
-        } else {
-            jsonObject.addProperty("message", "You are not logged in!");
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(jsonObject.toString());
-
-        }
-
-
-    }
-
     @RequestMapping(value = "/transaction", method = RequestMethod.POST, produces = {"application/json"},
             consumes = "application/json", headers = {"content-type=application/json; charset=utf-8"})
     @ResponseBody
@@ -412,61 +345,7 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(jsonObject.toString());
     }
 
-    @RequestMapping(value = "/transaction/{transactionid}/attachments", method = RequestMethod.GET, produces = "application/json")
-    @ResponseBody
-    public ResponseEntity getAttachmentsByTransactionID(@PathVariable("transactionid") String transactionid, @RequestHeader HttpHeaders headers,
-                                                        HttpServletRequest request) {
-        final String authorization = request.getHeader("Authorization");
-        JsonObject jsonObject = new JsonObject();
-        if (authorization != null && authorization.toLowerCase().startsWith("basic")) {
-            String[] values = AuthorizationUtility.getHeaderValues(authorization);
-            String userName = values[0];
-            String password = values[1];
-            BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-            List<User> userList = userDao.findByUserName(userName);
-            List<JsonObject> jsonObjectList = new ArrayList<>();
 
-            if (userList.size() != 0) {
-                User user = userList.get(0);
-                if (encoder.matches(password, user.getPassword())) {
-                    List<Transaction> transactionList = transactionDAO.findByTransactionid(transactionid);
-                    if (transactionList.size() != 0) {
-                        Transaction trans = transactionList.get(0);
-                        if (trans.getUser().getId() == user.getId()) {
-                            List<Attachment> attachmentList = attachmentDAO.findByTransaction(trans);
-                            if (attachmentList.size() != 0) {
-                                for (Attachment attachment : attachmentList) {
-                                    JsonObject attachmentObj = new JsonObject();
-                                    attachmentObj.addProperty("id", attachment.getAttachmentid());
-                                    attachmentObj.addProperty("url", attachment.getUrl());
-                                    jsonObjectList.add(attachmentObj);
-                                }
-                                return ResponseEntity.status(HttpStatus.OK).body(jsonObjectList.toString());
-                            } else {
-                                jsonObject.addProperty("message", "There are no attachments on this transaction");
-                                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(jsonObject.toString());
-                            }
-                        } else {
-                            jsonObject.addProperty("message", "User not found! - Try Logging in again");
-                            return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
-                        }
-                    } else {
-                        jsonObject.addProperty("message", "No transactions to show");
-                        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(jsonObject.toString());
-                    }
-                } else {
-                    jsonObject.addProperty("message", "Incorrect Password");
-                    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(jsonObject.toString());
-                }
-            } else {
-                jsonObject.addProperty("message", "User not found! - Try Logging in again");
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(jsonObject.toString());
-            }
-        } else {
-            jsonObject.addProperty("message", "You are not logged in!");
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(jsonObject.toString());
-        }
-    }
 
     @RequestMapping(value = "/transaction/{transactionid}/attachments/{attachmentid}", method = RequestMethod.DELETE, produces = {"application/json"})
     @ResponseBody
