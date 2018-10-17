@@ -1,0 +1,157 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "Creating IAM Policies, IAM Roles, S3 bucket and Code Deploy Application",
+    "Parameters":{
+      "CodeDeployServiceRoleName": {
+            "Type": "String"
+        },
+        "EC2ServiceRoleName": {
+            "Type": "String"
+        },
+        "CodeDeployPolicyName": {
+            "Type": "String"
+        },
+        "S3PolicyName": {
+            "Type": "String"
+        },
+        "TravisUser": {
+            "Type": "String"
+        },
+        "S3BucketName":{
+          "Type": "String"
+        }
+    },
+    "Resources": {
+     "OurCodeDeployServiceRole": {
+          "Type": "AWS::IAM::Role",
+          "Properties": {
+               "ManagedPolicyArns": [
+                   "arn:aws:iam::aws:policy/service-role/AWSCodeDeployRole"
+               ],
+               "AssumeRolePolicyDocument": {
+                   "Version": "2012-10-17",
+                   "Statement": [
+                       {
+                           "Action": "sts:AssumeRole",
+                           "Principal": {
+                               "Service": "codedeploy.amazonaws.com"
+                           },
+                           "Effect": "Allow"
+                       }
+                   ]
+               },
+               "Users": [
+                    {
+                        "Ref": "TravisUser"
+                    }
+                ],
+               "RoleName": {
+                   "Ref": "CodeDeployServiceRoleName"
+               }
+           }
+       },
+  "OurEC2ServiceRole": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Action": "sts:AssumeRole",
+                            "Principal": {
+                                "Service": "ec2.amazonaws.com"
+                            },
+                            "Effect": "Allow"
+                        }
+                    ]
+                },
+                "RoleName": {
+                    "Ref": "EC2ServiceRoleName"
+                }
+              }
+            },
+  "OuEC2Policy": {
+            "Type": "AWS::IAM::Policy",
+            "Properties": {
+                "PolicyName": {
+                    "Ref": "EC2PolicyName"
+                },
+                "PolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Action": "*",
+                            "Effect": "Allow",
+                            "Resource": "*"
+                        }
+                    ]
+                },
+                "Roles": [
+                    {
+                        "Ref": "OurEC2ServiceRole"
+                    }
+                ]
+            }
+        },
+ "OurCodeDeployPolicy": {
+            "Type": "AWS::IAM::Policy",
+            "Properties": {
+                "PolicyName": {
+                    "Ref": "CodeDeployPolicyName"
+                },
+                "PolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Effect": "Allow",
+                            "Action": [
+                                "codedeploy:*",
+                                "codedeploy:*"
+                            ]
+                          }
+                    ]
+                }
+            }
+        },
+ "OurS3Policy": {
+            "Type": "AWS::IAM::Policy",
+            "Properties": {
+                "PolicyName": {
+                    "Ref": "S3PolicyName"
+                },
+                "PolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Effect": "Allow",
+                            "Action": [
+                                "s3:PutObject"
+                            ],
+                            "Resource": [
+                                "*"
+                            ]
+                        }
+                    ]
+                },
+                "Users": [
+                    {
+                        "Ref": "TravisUser"
+                    }
+                ]
+            }
+        },
+ "ourS3Bucket": {
+            "Type": "AWS::S3::Bucket",
+            "Description": "S3 bucket",
+            "Properties": {
+                "AccessControl": "Private",
+                "BucketName": {
+                    "Ref": "S3BucketName"
+                }
+            }
+        }
+
+  
+  }
+
+}
