@@ -19,10 +19,13 @@
         },
         "S3BucketName":{
           "Type": "String"
-        }
+        },
+	"CodeDeployApplicationName":{
+	  "Type": "String"
+	}
     },
     "Resources": {
-     "OurCodeDeployServiceRole": {
+     "ourCodeDeployServiceRole": {
           "Type": "AWS::IAM::Role",
           "Properties": {
                "ManagedPolicyArns": [
@@ -50,7 +53,7 @@
                }
            }
        },
-  "OurEC2ServiceRole": {
+  "ourEC2ServiceRole": {
             "Type": "AWS::IAM::Role",
             "Properties": {
                 "AssumeRolePolicyDocument": {
@@ -70,7 +73,7 @@
                 }
               }
             },
-  "OuEC2Policy": {
+  "ouEC2Policy": {
             "Type": "AWS::IAM::Policy",
             "Properties": {
                 "PolicyName": {
@@ -93,7 +96,7 @@
                 ]
             }
         },
- "OurCodeDeployPolicy": {
+ "ourCodeDeployPolicy": {
             "Type": "AWS::IAM::Policy",
             "Properties": {
                 "PolicyName": {
@@ -113,7 +116,7 @@
                 }
             }
         },
- "OurS3Policy": {
+ "ourS3Policy": {
             "Type": "AWS::IAM::Policy",
             "Properties": {
                 "PolicyName": {
@@ -147,6 +150,14 @@
                 "AccessControl": "Private",
                 "BucketName": {
                     "Ref": "S3BucketName"
+                }
+            }
+        },
+"ourCodeDeployApplication": {
+            "Type": "AWS::CodeDeploy::Application",
+            "Properties": {
+                "ApplicationName": {
+                    "Ref": "CodeDeployApplicationName"
                 }
             }
         }
