@@ -22,7 +22,13 @@
         },
 	"CodeDeployApplicationName":{
 	  "Type": "String"
-	}
+	},
+	"AWSRegion": {
+          "Type": "String"
+        },
+        "AWSAccountID": {
+          "Type": "String"
+        }
     },
     "Resources": {
      "ourCodeDeployServiceRole": {
@@ -110,10 +116,36 @@
                             "Action": [
                                 "codedeploy:*",
                                 "codedeploy:*"
+                            ],
+
+                            "Resource": [
+                                {
+                                    "Fn::Join": [
+                                        ":",
+                                        [
+                                            "arn:aws:codedeploy",
+                                            {
+                                                "Ref": "AWSRegion"
+                                            },
+                                            {
+                                                "Ref": "AWSAccountID"
+                                            },
+                                            "application",
+                                            {
+                                                "Ref": "CodeDeployApplicationName"
+                                            }
+                                        ]
+                                    ]
+                                }
                             ]
                           }
                     ]
-                }
+                },
+		"Users": [
+                    {
+                        "Ref": "TravisUser"
+                    }
+                ]
             }
         },
  "ourS3Policy": {
