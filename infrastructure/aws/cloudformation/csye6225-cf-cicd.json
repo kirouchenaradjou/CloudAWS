@@ -5,12 +5,6 @@
     "CodeDeployEC2ServiceRoleName": {
       "Type": "String"
     },
-    "EC2ServiceRoleName": {
-      "Type": "String"
-    },
-    "CodeDeployPolicyName": {
-      "Type": "String"
-    },
     "CodeDeployServiceRoleName": {
       "Type": "String"
     },
@@ -32,8 +26,11 @@
     "AWSAccountID": {
       "Type": "String"
     },
-    "EC2PolicyName": {
-      "Type": "String"
+    "CodeDeployEC2S3PolicyName":{
+      "Type":"String"
+    },
+    "TravisCodeDeployPolicyName":{
+      "Type":"String"
     }
   },
   "Resources": {
@@ -76,27 +73,7 @@
         }
       }
     },
-    "ouEC2Policy": {
-      "Type": "AWS::IAM::Policy",
-      "Properties": {
-        "PolicyName": {
-          "Ref": "EC2PolicyName"
-        },
-        "PolicyDocument": {
-          "Version": "2012-10-17",
-          "Statement": [{
-            "Action": "*",
-            "Effect": "Allow",
-            "Resource": "*"
-          }]
-        },
-        "Roles": [{
-          "Ref": "ourEC2ServiceRole"
-        }]
-      }
-    },
-
-    "MyTravisCodeDeployPolicy": {
+    "ourTravisCodeDeployPolicy": {
       "Type": "AWS::IAM::Policy",
       "Properties": {
         "PolicyName": {
@@ -277,11 +254,6 @@
           ]
         }
       }
-
-
     }
-
-
   }
-
 }
