@@ -9,12 +9,7 @@ install: true
 script:
   - pwd
   - cd webapp
-  - mvn install
-  - cd build/libs
-  - ls -al
-  - cd ../../..
-  - pwd
-  - ls -al
+  - mvn install -DskipTests=true
 
 after_success:
   - pwd
