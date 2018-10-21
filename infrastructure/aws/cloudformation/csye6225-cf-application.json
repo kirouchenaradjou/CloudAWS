@@ -189,7 +189,9 @@
 "Tags" : [
 	{
 		"Key" : "Name",
-		"Value" : "hahaTest"
+		"Value" : {
+			"Ref":"EC2Name"
+		}
 	}
 ],
 "SecurityGroupIds" : [{
