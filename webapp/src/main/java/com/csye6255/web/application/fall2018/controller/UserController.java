@@ -26,6 +26,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -43,73 +44,6 @@ public class UserController {
 
     @Autowired
     AttachmentDAO attachmentDAO;
-
-
-    @RequestMapping(value = "/transaction", method = RequestMethod.GET, produces = "application/json")
-    @ResponseBody
-    public ResponseEntity getTransactions(@RequestHeader HttpHeaders headers, HttpServletRequest request) {
-        final String authorization = request.getHeader("Authorization");
-        JsonObject jsonObject = new JsonObject();
-        if (authorization != null && authorization.toLowerCase().startsWith("basic")) {
-            String[] values = AuthorizationUtility.getHeaderValues(authorization);
-            String userName = values[0];
-            String password = values[1];
-            BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-            List<User> userList = userDao.findByUserName(userName);
-            List<JsonObject> jsonObjectList = new ArrayList<>();
-            Gson gson = new Gson();
-            if (userList.size() != 0) {
-                User user = userList.get(0);
-                if (encoder.matches(password, user.getPassword())) {
-                    List<Transaction> transactionList = transactionDAO.findByUserId(user.getId());
-                    if (((List) transactionList).size() != 0) {
-                        for (Transaction transaction : transactionList) {
-                            JsonObject jsonObject1 = new JsonObject();
-                            jsonObject1.addProperty("id", transaction.getTransactionid());
-                            jsonObject1.addProperty("description", transaction.getDescription());
-                            jsonObject1.addProperty("amount", transaction.getAmount());
-                            jsonObject1.addProperty("date", transaction.getDate());
-                            jsonObject1.addProperty("merchant", transaction.getMerchant());
-                            jsonObject1.addProperty("category", transaction.getCategory());
-                            List<Attachment> attachmentList = attachmentDAO.findByTransaction(transaction);
-                            JsonObject attachmentObj = new JsonObject();
-
-                            if (attachmentList.size() != 0) {
-                                for (Attachment attachment : attachmentList) {
-                                    attachmentObj.addProperty("id", attachment.getAttachmentid());
-                                    attachmentObj.addProperty("url", attachment.getUrl());
-                                }
-                            }
-                            JsonElement attachmentJsonElement = gson.toJsonTree(attachmentObj);
-                            jsonObject1.add("attachments",attachmentJsonElement);
-                            jsonObjectList.add(jsonObject1);
-                        }
-                        return ResponseEntity.status(HttpStatus.OK).body(jsonObjectList.toString());
-
-                    } else {
-                        jsonObject.addProperty("message", "There is no transactions to show");
-                        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(jsonObject.toString());
-                    }
-
-                } else {
-                    jsonObject.addProperty("message", "Incorrect Password");
-                    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(jsonObject.toString());
-                }
-
-
-            } else {
-                jsonObject.addProperty("message", "User not found! - Try Logging in again");
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(jsonObject.toString());
-            }
-
-        } else {
-            jsonObject.addProperty("message", "You are not logged in!");
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(jsonObject.toString());
-
-        }
-
-
-    }
 
     @RequestMapping(value = "/transaction", method = RequestMethod.POST, produces = {"application/json"},
             consumes = "application/json", headers = {"content-type=application/json; charset=utf-8"})
@@ -140,7 +74,7 @@ public class UserController {
                         t.setCategory(transaction.getCategory());
                         t.setUser(user);
                         transactionDAO.save(t);
-                        if(transaction.getAttachments()!=null) {
+                        if (transaction.getAttachments() != null) {
                             attachment.setUrl(transaction.getAttachments().get(0).getUrl());
                             attachment.setTransaction(t);
                             attachmentDAO.save(attachment);
@@ -270,7 +204,7 @@ public class UserController {
                             if (uploadReceiptFile.isEmpty()) {
                                 logger.error("attachFilesToTransaction Method : No file to upload");
                             }
-                            String path = System.getProperty("user.dir") + "/images";		//Absolute Project Path
+                            String path = System.getProperty("user.dir") + "/images";        //Absolute Project Path
                             logger.info(path);
                             if (!uploadReceiptFile.isEmpty()) {
                                 String filename = uploadReceiptFile.getOriginalFilename();
@@ -294,8 +228,8 @@ public class UserController {
                                         return ResponseEntity.status(HttpStatus.OK).body(jsonObject.toString());
 
                                     } catch (Exception ex) {
-                                        jsonObject.addProperty("message", "Error while storing in local storage "+ex.getMessage());
-                                        logger.error("attachFilesToTransaction Method : exception" +ex.getMessage());
+                                        jsonObject.addProperty("message", "Error while storing in local storage " + ex.getMessage());
+                                        logger.error("attachFilesToTransaction Method : exception" + ex.getMessage());
 
                                         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(jsonObject.toString());
 
@@ -317,8 +251,7 @@ public class UserController {
                 jsonObject.addProperty("message", "User not found! - Try Logging in again");
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(jsonObject.toString());
             }
-        }
-        else {
+        } else {
             jsonObject.addProperty("message", "You are not logged in - Provide Username and Password!");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(jsonObject.toString());
         }
@@ -328,8 +261,8 @@ public class UserController {
     @RequestMapping(value = "/transaction/{transactionid}/attachments/{attachmentid}", method = RequestMethod.PUT, produces = {"application/json"})
     @ResponseBody
     public ResponseEntity replaceAttachment(@PathVariable("transactionid") String transactionid,
-                                            @PathVariable("attachmentid") String attachmentid,   HttpServletRequest request,
-                                            @RequestParam("uploadReceipt") MultipartFile uploadReceiptFile) throws FileNotFoundException, IOException{
+                                            @PathVariable("attachmentid") String attachmentid, HttpServletRequest request,
+                                            @RequestParam("uploadReceipt") MultipartFile uploadReceiptFile) throws FileNotFoundException, IOException {
         JsonObject jsonObject = new JsonObject();
         final String authorization = request.getHeader("Authorization");
         if (authorization != null && authorization.toLowerCase().startsWith("basic")) {
@@ -349,7 +282,7 @@ public class UserController {
                             if (uploadReceiptFile.isEmpty()) {
                                 logger.error("attachFilesToTransaction Method : No file to upload");
                             }
-                            String path = System.getProperty("user.dir") + "/images";		//Absolute Project Path
+                            String path = System.getProperty("user.dir") + "/images";        //Absolute Project Path
                             logger.info(path);
                             if (!uploadReceiptFile.isEmpty()) {
                                 String filename = uploadReceiptFile.getOriginalFilename();
@@ -363,13 +296,10 @@ public class UserController {
                                     try {
 
                                         List<Attachment> attachmentList = attachmentDAO.findByTransaction(trans);
-                                        for(Attachment attachment1 : attachmentList)
-                                        {
-                                            if(attachment1.getAttachmentid().equals(attachmentid))
-                                            {
+                                        for (Attachment attachment1 : attachmentList) {
+                                            if (attachment1.getAttachmentid().equals(attachmentid)) {
                                                 File file = new File(attachment1.getUrl());
-                                                if(file.exists())
-                                                {
+                                                if (file.exists()) {
                                                     file.delete();
                                                 }
                                                 logger.info(filePath + newFileName);
@@ -384,8 +314,8 @@ public class UserController {
                                         }
 
                                     } catch (Exception ex) {
-                                        jsonObject.addProperty("message", "Error while storing in local storage "+ex.getMessage());
-                                        logger.error("attachFilesToTransaction Method : exception" +ex.getMessage());
+                                        jsonObject.addProperty("message", "Error while storing in local storage " + ex.getMessage());
+                                        logger.error("attachFilesToTransaction Method : exception" + ex.getMessage());
 
                                         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(jsonObject.toString());
 
@@ -407,8 +337,7 @@ public class UserController {
                 jsonObject.addProperty("message", "User not found! - Try Logging in again");
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(jsonObject.toString());
             }
-        }
-        else {
+        } else {
             jsonObject.addProperty("message", "You are not logged in - Provide Username and Password!");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(jsonObject.toString());
         }
@@ -416,19 +345,20 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(jsonObject.toString());
     }
 
-    @RequestMapping(value = "/transaction/{transactionid}/attachments", method = RequestMethod.GET, produces = "application/json")
+
+
+    @RequestMapping(value = "/transaction/{transactionid}/attachments/{attachmentid}", method = RequestMethod.DELETE, produces = {"application/json"})
     @ResponseBody
-    public ResponseEntity getAttachmentsByTransactionID(@PathVariable("transactionid") String transactionid, @RequestHeader HttpHeaders headers,
-                                                        HttpServletRequest request) {
-        final String authorization = request.getHeader("Authorization");
+    public ResponseEntity deleteAttachment(@PathVariable("transactionid") String transactionid,
+                                           @PathVariable("attachmentid") String attachmentid, HttpServletRequest request) throws FileNotFoundException, IOException {
         JsonObject jsonObject = new JsonObject();
+        final String authorization = request.getHeader("Authorization");
         if (authorization != null && authorization.toLowerCase().startsWith("basic")) {
             String[] values = AuthorizationUtility.getHeaderValues(authorization);
             String userName = values[0];
             String password = values[1];
             BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
             List<User> userList = userDao.findByUserName(userName);
-            List<JsonObject> jsonObjectList = new ArrayList<>();
 
             if (userList.size() != 0) {
                 User user = userList.get(0);
@@ -437,23 +367,36 @@ public class UserController {
                     if (transactionList.size() != 0) {
                         Transaction trans = transactionList.get(0);
                         if (trans.getUser().getId() == user.getId()) {
-                            List<Attachment> attachmentList = attachmentDAO.findByTransaction(trans);
+                            List<Attachment> attachmentList = attachmentDAO.findAttachmentByAttachmentid(attachmentid);
                             if (attachmentList.size() != 0) {
-                                for (Attachment attachment : attachmentList) {
-                                    JsonObject attachmentObj = new JsonObject();
-                                    attachmentObj.addProperty("id", attachment.getAttachmentid());
-                                    attachmentObj.addProperty("url", attachment.getUrl());
-                                    jsonObjectList.add(attachmentObj);
+                                Attachment attachment = attachmentList.get(0);
+                                try {
+                                    File file = new File(attachment.getUrl());
+                                    if (file.exists()) {
+                                        file.delete();
+                                        attachmentDAO.delete(attachment);
+                                        jsonObject.addProperty("message", "File deleted successfully");
+                                        return ResponseEntity.status(HttpStatus.OK).body(jsonObject.toString());
+                                    } else {
+                                        logger.error("deleteAttachment Method : No file to delete");
+                                    }
+                                } catch (Exception ex) {
+                                    jsonObject.addProperty("message", "Error while storing in local storage " + ex.getMessage());
+                                    logger.error("deleteAttachment Method : exception" + ex.getMessage());
+
+                                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(jsonObject.toString());
                                 }
-                                return ResponseEntity.status(HttpStatus.OK).body(jsonObjectList.toString());
+
                             } else {
-                                jsonObject.addProperty("message", "There are no attachments on this transaction");
-                                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(jsonObject.toString());
+                                jsonObject.addProperty("message", "No attachments found to delete");
+                                return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
                             }
-                        } else
-                            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+                        } else {
+                            jsonObject.addProperty("message", "User not found! - Try Logging in again");
+                            return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
+                        }
                     } else {
-                        jsonObject.addProperty("message", "No transactions to show");
+                        jsonObject.addProperty("message", "No transaction found for the user");
                         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(jsonObject.toString());
                     }
                 } else {
@@ -465,10 +408,10 @@ public class UserController {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(jsonObject.toString());
             }
         } else {
-            jsonObject.addProperty("message", "You are not logged in!");
+            jsonObject.addProperty("message", "You are not logged in - Provide Username and Password!");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(jsonObject.toString());
         }
+        jsonObject.addProperty("message", "Attachment Not Found");
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(jsonObject.toString());
     }
-
-
 }
