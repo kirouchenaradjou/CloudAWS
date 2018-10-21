@@ -121,7 +121,7 @@
 												[
 													"sudo echo 'JAVA_OPTS=\"$JAVA_OPTS -Dspring.datasource.password=",
 													{
-														"Ref": "MasterUserPassword"
+														"Ref": "MasterUserPwd"
 													},
 													"\"' >> setenv.sh \n"
 												]
@@ -189,7 +189,7 @@
 "Tags" : [
 	{
 		"Key" : "Name",
-		"Value" : "app-csye6225-ec2"
+		"Value" : "hahaTest"
 	}
 ],
 "SecurityGroupIds" : [{
