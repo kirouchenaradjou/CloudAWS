@@ -15,7 +15,9 @@ after_success:
   - pwd
   - ls -al
   - mkdir codedeploy_artifact
-  - cd target
+  - cd ..
+  - ls -al
+  - cd ..
   - ls -al
   - cp fall2018-0.0.1-SNAPSHOT.war/infrastructure/aws/codedeploy/*.sh .
   - cp infrastructure/aws/codedeploy/*.yml .
