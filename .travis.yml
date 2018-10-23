@@ -52,3 +52,4 @@ deploy:
     wait-until-deployed: true
     on:
       branch: assignment05-06
+
