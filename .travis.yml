@@ -28,6 +28,8 @@ after_success:
   - cd ..
   - pwd
   - ls -al
+  - cd target
+  - ls -al
 
 deploy:
   - provider: s3
