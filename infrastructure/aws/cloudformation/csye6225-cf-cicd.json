@@ -70,7 +70,30 @@
         },
         "RoleName": {
           "Ref": "CodeDeployEC2ServiceRoleName"
-        }
+        },
+        "Policies": [
+          {
+            "PolicyName": "AWSCodeDeployRolenew",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "ec2:DescribeInstances",
+                    "ec2:DescribeInstanceStatus",
+                    "ec2:TerminateInstances",
+                    "tag:GetTags",
+                    "tag:GetResources"
+                  ],
+                  "Resource": [
+                    "*"
+                  ]
+                }
+              ]
+            }
+          }
+        ]
       }
     },
     "ourTravisCodeDeployPolicy": {
@@ -82,93 +105,93 @@
         "PolicyDocument": {
           "Version": "2012-10-17",
           "Statement": [{
-              "Effect": "Allow",
-              "Action": [
-                "codedeploy:RegisterApplicationRevision",
-                "codedeploy:GetApplicationRevision"
-              ],
-              "Resource": [{
-                "Fn::Join": [
-                  ":",
-                  [
-                    "arn:aws:codedeploy",
-                    {
-                      "Ref": "AWSRegion"
-                    },
-                    {
-                      "Ref": "AWSAccountID"
-                    },
-                    "application",
-                    {
-                      "Ref": "CodeDeployApplicationName"
-                    }
-                  ]
+            "Effect": "Allow",
+            "Action": [
+              "codedeploy:RegisterApplicationRevision",
+              "codedeploy:GetApplicationRevision"
+            ],
+            "Resource": [{
+              "Fn::Join": [
+                ":",
+                [
+                  "arn:aws:codedeploy",
+                  {
+                    "Ref": "AWSRegion"
+                  },
+                  {
+                    "Ref": "AWSAccountID"
+                  },
+                  "application",
+                  {
+                    "Ref": "CodeDeployApplicationName"
+                  }
                 ]
-              }]
-            },
-            {
-              "Effect": "Allow",
-              "Action": [
-                "codedeploy:CreateDeployment",
-                "codedeploy:GetDeployment"
-              ],
-              "Resource": [
-                "*"
+              ]
+            }]
+          },
+          {
+            "Effect": "Allow",
+            "Action": [
+              "codedeploy:CreateDeployment",
+              "codedeploy:GetDeployment"
+            ],
+            "Resource": [
+              "*"
+            ]
+          },
+          {
+            "Effect": "Allow",
+            "Action": [
+              "codedeploy:GetDeploymentConfig"
+            ],
+            "Resource": [{
+              "Fn::Join": [
+                ":",
+                [
+                  "arn:aws:codedeploy",
+                  {
+                    "Ref": "AWSRegion"
+                  },
+                  {
+                    "Ref": "AWSAccountID"
+                  },
+                  "deploymentconfig:CodeDeployDefault.OneAtATime"
+                ]
               ]
             },
             {
-              "Effect": "Allow",
-              "Action": [
-                "codedeploy:GetDeploymentConfig"
-              ],
-              "Resource": [{
-                  "Fn::Join": [
-                    ":",
-                    [
-                      "arn:aws:codedeploy",
-                      {
-                        "Ref": "AWSRegion"
-                      },
-                      {
-                        "Ref": "AWSAccountID"
-                      },
-                      "deploymentconfig:CodeDeployDefault.OneAtATime"
-                    ]
-                  ]
-                },
-                {
-                  "Fn::Join": [
-                    ":",
-                    [
-                      "arn:aws:codedeploy",
-                      {
-                        "Ref": "AWSRegion"
-                      },
-                      {
-                        "Ref": "AWSAccountID"
-                      },
-                      "deploymentconfig:CodeDeployDefault.HalfAtATime"
-                    ]
-                  ]
-                },
-                {
-                  "Fn::Join": [
-                    ":",
-                    [
-                      "arn:aws:codedeploy",
-                      {
-                        "Ref": "AWSRegion"
-                      },
-                      {
-                        "Ref": "AWSAccountID"
-                      },
-                      "deploymentconfig:CodeDeployDefault.AllAtOnce"
-                    ]
-                  ]
-                }
+              "Fn::Join": [
+                ":",
+                [
+                  "arn:aws:codedeploy",
+                  {
+                    "Ref": "AWSRegion"
+                  },
+                  {
+                    "Ref": "AWSAccountID"
+                  },
+                  "deploymentconfig:CodeDeployDefault.HalfAtATime"
+                ]
+              ]
+            },
+            {
+              "Fn::Join": [
+                ":",
+                [
+                  "arn:aws:codedeploy",
+                  {
+                    "Ref": "AWSRegion"
+                  },
+                  {
+                    "Ref": "AWSAccountID"
+                  },
+                  "deploymentconfig:CodeDeployDefault.AllAtOnce"
+                ]
               ]
             }
           ]
+          }
+        ]
         },
         "Users": [{
           "Ref": "TravisUser"
