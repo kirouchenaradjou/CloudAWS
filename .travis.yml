@@ -10,6 +10,8 @@ script:
   - pwd
   - cd webapp
   - mvn install -DskipTests=true
+  - cd /webapp/target
+  - ls -al
 
 after_success:
   - pwd
