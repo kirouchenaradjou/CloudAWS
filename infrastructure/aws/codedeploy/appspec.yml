@@ -2,7 +2,7 @@ version: 0.0
 os: linux
 
 files:             
-  - source: ./webapp/target/fall2018-0.0.1-SNAPSHOT.war
+  - source: ./web/application/fall2018/0.0.1-SNAPSHOT/fall2018-0.0.1-SNAPSHOT.war
     destination: /opt/tomcat/webapps
 
 hooks:
