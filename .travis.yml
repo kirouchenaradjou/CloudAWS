@@ -10,13 +10,12 @@ script:
   - pwd
   - cd webapp
   - mvn install -DskipTests=true
-  - cd /webapp/target
-  - ls -al
-
+  
 after_success:
   - pwd
   - ls -al
   - mkdir codedeploy_artifact
+  - cd /webapp
   - cp infrastructure/aws/codedeploy/*.sh .
   - cp infrastructure/aws/codedeploy/*.yml .
   - zip -r csye6225-web-app-${TRAVIS_JOB_NUMBER}.zip /web/target/fall2018-0.0.1-SNAPSHOT.war *.sh *.yml
