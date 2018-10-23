@@ -15,6 +15,7 @@ after_success:
   - pwd
   - ls -al
   - mkdir codedeploy_artifact
+  - cd ..
   - ls -al
   - cp infrastructure/aws/codedeploy/*.sh .
   - cp infrastructure/aws/codedeploy/*.yml .
