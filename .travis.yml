@@ -15,7 +15,8 @@ after_success:
   - pwd
   - ls -al
   - mkdir codedeploy_artifact
-  - cd /target
+  - cd target
+  - ls -al
   - cp infrastructure/aws/codedeploy/*.sh .
   - cp infrastructure/aws/codedeploy/*.yml .
   - zip -r csye6225-web-app-${TRAVIS_JOB_NUMBER}.zip fall2018-0.0.1-SNAPSHOT.war *.sh *.yml
