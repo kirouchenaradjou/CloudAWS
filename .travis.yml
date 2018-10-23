@@ -14,7 +14,6 @@ script:
 after_success:
   - pwd
   - ls -al
-  - mkdir codedeploy_artifact
   - cd ..
   - ls -al
   - cp infrastructure/aws/codedeploy/*.sh .
@@ -22,12 +21,8 @@ after_success:
   - zip -r csye6225-web-app-${TRAVIS_JOB_NUMBER}.zip ./webapp/target/fall2018-0.0.1-SNAPSHOT.war *.sh *.yml
   - ls -al
   - pwd
-  - cd codedeploy_artifact
-  - cd ..
-  - ls -al
+  - mkdir codedeploy_artifact
   - mv csye6225-web-app-${TRAVIS_JOB_NUMBER}.zip codedeploy_artifact
-  - ls -al
-  - pwd
   - cd codedeploy_artifact
   - ls -al
   - pwd
