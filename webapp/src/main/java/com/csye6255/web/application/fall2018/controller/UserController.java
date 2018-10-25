@@ -59,7 +59,7 @@ public class UserController {
             List<User> userList = userDao.findByUserName(userName);
 
 
-            if (userList.size() != 0) {
+            if ((userList.size() != 0)||(!(password != null && password.length() == 0))) {
                 User user = userList.get(0);
                 if (encoder.matches(password, user.getPassword())) {
                     if (transaction.getDescription() != null && transaction.getAmount() != null
@@ -108,13 +108,14 @@ public class UserController {
     @ResponseBody
     public ResponseEntity<?> deleteTransactions(@PathVariable("transactionid") String transactionid, HttpServletRequest request) {
         final String authorization = request.getHeader("Authorization");
+        JsonObject jsonObject = new JsonObject();
         if (authorization != null && authorization.toLowerCase().startsWith("basic")) {
             String[] values = AuthorizationUtility.getHeaderValues(authorization);
             String userName = values[0];
             String password = values[1];
             BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
             List<User> userList = userDao.findByUserName(userName);
-            if (userList.size() != 0) {
+            if ((userList.size() != 0)||(!(password != null && password.length() == 0))) {
                 User user = userList.get(0);
                 List<Transaction> transactionList = transactionDAO.findByTransactionid(transactionid);
                 if (encoder.matches(password, user.getPassword())) {
@@ -126,7 +127,11 @@ public class UserController {
                         } else
                             return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
                     } else
-                        return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+                        // return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+                    {
+                        jsonObject.addProperty("message", "Given Transaction not found for this user");
+                        return ResponseEntity.status(HttpStatus.OK).body(jsonObject.toString());
+                    }
                 } else
                     return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
             } else
@@ -141,13 +146,14 @@ public class UserController {
     @ResponseBody
     public ResponseEntity updateTransaction(@PathVariable("transactionid") String transactionid, HttpServletRequest request, @RequestBody Transaction transaction) {
         final String authorization = request.getHeader("Authorization");
+        JsonObject jsonObject = new JsonObject();
         if (authorization != null && authorization.toLowerCase().startsWith("basic")) {
             String[] values = AuthorizationUtility.getHeaderValues(authorization);
             String userName = values[0];
             String password = values[1];
             BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
             List<User> userList = userDao.findByUserName(userName);
-            if (userList.size() != 0) {
+            if ((userList.size() != 0)||(!(password != null && password.length() == 0))) {
                 User user = userList.get(0);
                 List<Transaction> transactionList = transactionDAO.findByTransactionid(transactionid);
                 if (encoder.matches(password, user.getPassword())) {
@@ -172,7 +178,11 @@ public class UserController {
                         } else
                             return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
                     } else
-                        return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+                        //return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+                        {
+                        jsonObject.addProperty("message", "Given Transaction not found for this user");
+                        return ResponseEntity.status(HttpStatus.OK).body(jsonObject.toString());
+                    }
                 } else
                     return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
             } else
@@ -194,7 +204,7 @@ public class UserController {
             BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
             List<User> userList = userDao.findByUserName(userName);
 
-            if (userList.size() != 0) {
+            if ((userList.size() != 0)||(!(password != null && password.length() == 0))) {
                 User user = userList.get(0);
                 if (encoder.matches(password, user.getPassword())) {
                     List<Transaction> transactionList = transactionDAO.findByTransactionid(transactionid);
@@ -272,7 +282,7 @@ public class UserController {
             BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
             List<User> userList = userDao.findByUserName(userName);
 
-            if (userList.size() != 0) {
+            if ((userList.size() != 0)||(!(password != null && password.length() == 0))) {
                 User user = userList.get(0);
                 if (encoder.matches(password, user.getPassword())) {
                     List<Transaction> transactionList = transactionDAO.findByTransactionid(transactionid);
@@ -342,7 +352,7 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(jsonObject.toString());
         }
         jsonObject.addProperty("message", "Attachment Not Found");
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(jsonObject.toString());
+        return ResponseEntity.status(HttpStatus.OK).body(jsonObject.toString());
     }
 
 
@@ -360,7 +370,7 @@ public class UserController {
             BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
             List<User> userList = userDao.findByUserName(userName);
 
-            if (userList.size() != 0) {
+            if ((userList.size() != 0)||(!(password != null && password.length() == 0))) {
                 User user = userList.get(0);
                 if (encoder.matches(password, user.getPassword())) {
                     List<Transaction> transactionList = transactionDAO.findByTransactionid(transactionid);
@@ -376,9 +386,11 @@ public class UserController {
                                         file.delete();
                                         attachmentDAO.delete(attachment);
                                         jsonObject.addProperty("message", "File deleted successfully");
-                                        return ResponseEntity.status(HttpStatus.OK).body(jsonObject.toString());
+                                        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(jsonObject.toString());
                                     } else {
-                                        logger.error("deleteAttachment Method : No file to delete");
+                                        //logger.error("deleteAttachment Method : No file to delete");
+                                        jsonObject.addProperty("message", "No file to delete");
+                                        return ResponseEntity.status(HttpStatus.OK).body(jsonObject.toString());
                                     }
                                 } catch (Exception ex) {
                                     jsonObject.addProperty("message", "Error while storing in local storage " + ex.getMessage());
@@ -389,15 +401,15 @@ public class UserController {
 
                             } else {
                                 jsonObject.addProperty("message", "No attachments found to delete");
-                                return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+                                return ResponseEntity.status(HttpStatus.OK).body(jsonObject.toString());
                             }
                         } else {
                             jsonObject.addProperty("message", "User not found! - Try Logging in again");
-                            return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
+                            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(jsonObject.toString());
                         }
                     } else {
                         jsonObject.addProperty("message", "No transaction found for the user");
-                        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(jsonObject.toString());
+                        return ResponseEntity.status(HttpStatus.OK).body(jsonObject.toString());
                     }
                 } else {
                     jsonObject.addProperty("message", "Incorrect Password");
@@ -411,7 +423,7 @@ public class UserController {
             jsonObject.addProperty("message", "You are not logged in - Provide Username and Password!");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(jsonObject.toString());
         }
-        jsonObject.addProperty("message", "Attachment Not Found");
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(jsonObject.toString());
+        //jsonObject.addProperty("message", "Attachment Not Found");
+        //return ResponseEntity.status(HttpStatus.OK).body(jsonObject.toString());
     }
 }
