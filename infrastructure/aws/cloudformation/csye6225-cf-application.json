@@ -75,7 +75,7 @@
 				"UserData": {
 					"Fn::Base64": {
 						"Fn::Join": [
-							"",
+							"\n",
 							[
 								"#!/bin/bash -xe",
 								"sudo yum update",
@@ -91,8 +91,8 @@
                                 "sudo chmod +x ./install",
 								"sudo ./install auto",
 								"sudo service codedeploy-agent start",
-								"mkdir /opt/tomcat",
-                                "tar xvf apache-tomcat-8*tar.gz -C /opt/tomcat --strip-components=1",
+								"sudo mkdir /opt/tomcat",
+                                "sudo tar xvf apache-tomcat-8*tar.gz -C /opt/tomcat --strip-components=1",
 								"cd /opt/tomcat",
                                 "sudo chgrp -R tomcat /opt/tomcat",
                                 "sudo chmod -R g+r conf",
