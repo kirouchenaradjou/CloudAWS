@@ -27,7 +27,8 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Date;
 import java.util.List;
-
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 @Controller
@@ -48,7 +49,7 @@ public class CommonController {
     @RequestMapping(value = "/user/register", method = RequestMethod.POST, produces = {"application/json"},
             consumes = "application/json", headers = {"content-type=application/json; charset=utf-8"})
     @ResponseBody
-    public String postRegister(@RequestBody User user) {
+    public ResponseEntity postRegister(@RequestBody User user) {
 
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
@@ -61,18 +62,27 @@ public class CommonController {
             BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
             String password = user.getPassword();
             String hashedPassword = passwordEncoder.encode(password);
+            String regex = "^[A-Za-z0-9+_.-]+@(.+)$";
+            Pattern pattern = Pattern.compile(regex);
+            Matcher matcher = pattern.matcher(user.getUserName());
+            if (!(matcher.matches())){
 
+                jsonObject.addProperty("message", "User name invalid");
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(jsonObject.toString());
+            }
             User u = new User();
             u.setUserName(user.getUserName());
             u.setPassword(hashedPassword);
             userDao.save(u);
-            jsonObject.addProperty("message", "Registration Successful");
+          //  return ResponseEntity.status(HttpStatus.NOT_FOUND).body(jsonObject.toString());
+            jsonObject.addProperty("message", "User created Successful");
+            return ResponseEntity.status(HttpStatus.CREATED).body(jsonObject.toString());
 
 
-        } else jsonObject.addProperty("message", "User already exists!");
-
-        return jsonObject.toString();
-
+        } else {
+            jsonObject.addProperty("message", "User already exist");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(jsonObject.toString());
+        }
 
     }
 
@@ -190,7 +200,7 @@ public class CommonController {
 
                     } else {
                         jsonObject.addProperty("message", "There is no transactions to show");
-                        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(jsonObject.toString());
+                        return ResponseEntity.status(HttpStatus.OK).body(jsonObject.toString());
                     }
 
                 } else {
@@ -227,7 +237,7 @@ public class CommonController {
             List<User> userList = userDao.findByUserName(userName);
             List<JsonObject> jsonObjectList = new ArrayList<>();
 
-            if (userList.size() != 0) {
+            if ((userList.size() != 0)||(!(password != null && password.length() == 0))) {
                 User user = userList.get(0);
                 if (encoder.matches(password, user.getPassword())) {
                     List<Transaction> transactionList = transactionDAO.findByTransactionid(transactionid);
@@ -245,7 +255,7 @@ public class CommonController {
                                 return ResponseEntity.status(HttpStatus.OK).body(jsonObjectList.toString());
                             } else {
                                 jsonObject.addProperty("message", "There are no attachments on this transaction");
-                                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(jsonObject.toString());
+                                return ResponseEntity.status(HttpStatus.OK).body(jsonObject.toString());
                             }
                         } else {
                             jsonObject.addProperty("message", "User not found! - Try Logging in again");
@@ -253,7 +263,7 @@ public class CommonController {
                         }
                     } else {
                         jsonObject.addProperty("message", "No transactions to show");
-                        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(jsonObject.toString());
+                        return ResponseEntity.status(HttpStatus.OK).body(jsonObject.toString());
                     }
                 } else {
                     jsonObject.addProperty("message", "Incorrect Password");
