@@ -91,8 +91,6 @@
                                 "sudo chmod +x ./install",
 								"sudo ./install auto",
 								"sudo service codedeploy-agent start",
-								"sudo yum install tomcat8 -y",
-								"sudo service tomcat8 restart",
 								"mkdir /opt/tomcat",
                                 "tar xvf apache-tomcat-8*tar.gz -C /opt/tomcat --strip-components=1",
 								"cd /opt/tomcat",
