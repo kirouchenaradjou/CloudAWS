@@ -69,28 +69,68 @@
 				"ImageId":{
 					"Ref":"AMIImage"
 				},
-				"UserData":{
-					"Fn::Base64":{
-						"Fn::Join":[
+				"KeyName":{
+					"Ref":"EC2Name"
+				},
+				"UserData": {
+					"Fn::Base64": {
+						"Fn::Join": [
 							"",
 							[
-								"#!/bin/bash -xe \n",
-								"sudo apt-get update \n",
-								"sudo apt-get install openjdk-8-jdk -y\n",
-								"sudo apt-get install ruby -y \n",
-								"sudo apt-get install wget -y \n",
-								"sudo apt-get install python -y \n",
-								"sudo apt-get update \n",
-								"sudo wget https://aws-codedeploy-us-east-1.s3.amazonaws.com/latest/install \n",
-								"sudo chmod +x ./install \n",
-								"sudo ./install auto \n",
-								"sudo service codedeploy-agent start \n",
-								"sudo apt-get install tomcat8 -y \n",
-								"sudo service tomcat8 restart \n",
-								"cd /usr/share/tomcat8/bin \n",
-								"sudo touch setenv.sh \n",
-								"sudo chmod 777 setenv.sh \n",
-								"sudo echo '#!/bin/sh' >> setenv.sh \n",
+								"#!/bin/bash -xe",
+								"sudo yum update",
+								"sudo yum install ruby python ntp wget java-1.8.0-openjdk-devel -y",
+								"sudo yum update",
+								"sudo systemctl start ntpd",
+								"sudo systemctl enable ntpd",
+								"sudo groupadd tomcat",
+								"sudo useradd -M -s /bin/nologin -g tomcat -d /opt/tomcat tomcat",
+								"cd /tmp",
+                                "sudo wget http://apache.mirrors.pair.com/tomcat/tomcat-8/v8.5.34/bin/apache-tomcat-8.5.34.tar.gz",
+                                "sudo wget https://aws-codedeploy-us-east-1.s3.amazonaws.com/latest/install",
+                                "sudo chmod +x ./install",
+								"sudo ./install auto",
+								"sudo service codedeploy-agent start",
+								"sudo yum install tomcat8 -y",
+								"sudo service tomcat8 restart",
+								"mkdir /opt/tomcat",
+                                "tar xvf apache-tomcat-8*tar.gz -C /opt/tomcat --strip-components=1",
+								"cd /opt/tomcat",
+                                "sudo chgrp -R tomcat /opt/tomcat",
+                                "sudo chmod -R g+r conf",
+                                "sudo chmod g+x conf",
+                                "sudo chown -R tomcat webapps/ work/ temp/ logs/",
+                                "sudo systemctl daemon-reload",
+                                "cd /usr/lib/systemd/system",
+                                "sudo touch tomcat.service",
+                                "sudo echo '[Unit]' >> tomcat.service",
+                                "sudo echo 'Description=Apache Tomcat Web Application Container' >> tomcat.service",
+                                "sudo echo 'After=syslog.target network.target' >> tomcat.service",
+                                "sudo echo '[Service]' >> tomcat.service",
+                                "sudo echo 'Type=forking' >> tomcat.service",
+                                "sudo echo 'Environment=JAVA_HOME=/usr/lib/jvm/jre' >> tomcat.service",
+                                "sudo echo 'Environment=CATALINA_PID=/opt/tomcat/temp/tomcat.pid' >> tomcat.service",
+                                "sudo echo 'Environment=CATALINA_HOME=/opt/tomcat' >> tomcat.service",
+                                "sudo echo 'Environment=CATALINA_BASE=/opt/tomcat' >> tomcat.service",
+                                "sudo echo 'Environment=\"CATALINA_OPTS=-Xms512M -Xmx1024M -server -XX:+UseParallelGC\"' >> tomcat.service",
+                                "sudo echo 'Environment=\"JAVA_OPTS=-Djava.awt.headless=true -Djava.security.egd=file:/dev/./urandom\"' >> tomcat.service",
+                                "sudo echo 'ExecStart=/opt/tomcat/bin/startup.sh' >> tomcat.service",
+                                "sudo echo 'ExecStop=/bin/kill -15 $MAINPID' >> tomcat.service",
+                                "sudo echo 'User=tomcat' >> tomcat.service",
+                                "sudo echo 'Group=tomcat' >> tomcat.service",
+                                "sudo echo 'UMask=0007' >> tomcat.service",
+                                "sudo echo 'RestartSec=10' >> tomcat.service",
+                                "sudo echo 'Restart=always' >> tomcat.service",
+                                "sudo echo '[Install]' >> tomcat.service",
+                                "sudo echo 'WantedBy=multi-user.target' >> tomcat.service",
+                                "#systemctl start cloudwatch.service",
+                                "#systemctl enable cloudwatch.service",
+                                "sudo systemctl enable tomcat.service",
+                                "sudo systemctl start tomcat.service",
+                                "cd /opt/tomcat/bin",
+								"sudo touch setenv.sh",
+								"sudo chmod 777 setenv.sh",
+								"sudo echo '#!/bin/sh' >> setenv.sh",
 								{
 									"Fn::Join":[
 										"",
@@ -131,46 +171,7 @@
 									]
 								},
 								"sudo echo 'JAVA_OPTS=\"$JAVA_OPTS -Dspring.profiles.active=aws\"' >> setenv.sh \n",
-								"sudo service tomcat8 restart \n",
-								"sudo apt-get update \n",
-								"sudo touch /tmp/awslogs.conf \n",
-								"sudo chmod 777 /tmp/awslogs.conf \n",
-								"sudo echo '[general]' > /tmp/awslogs.conf \n",
-								"sudo echo 'state_file= /var/awslogs/agent-state' >> /tmp/awslogs.conf \n",
-								"sudo echo '[logstream1]' >> /tmp/awslogs.conf \n",
-								"sudo echo 'file = /var/log/tomcat8/csye6225-aws.log' >> /tmp/awslogs.conf \n",
-								"sudo echo 'log_group_name = csye6225-webapp' >> /tmp/awslogs.conf \n",
-								"sudo echo 'log_stream_name = csye6225-webapp' >> /tmp/awslogs.conf \n",
-								"sudo echo 'datetime_format = %d/%b/%Y:%H:%M:%S' >> /tmp/awslogs.conf \n",
-								"curl https://s3.amazonaws.com/aws-cloudwatch/downloads/latest/awslogs-agent-setup.py -O \n",
-								{
-									"Fn::Join":[
-										" ",
-										[
-											"sudo python ./awslogs-agent-setup.py -n -r",
-											{
-												"Ref":"AWS::Region"
-											},
-											"-c /tmp/awslogs.conf || error_exit 'Failed to run CloudWatch Logs agent setup' \n"
-										]
-									]
-								},
-								"cd /etc/systemd/system \n",
-								"sudo touch awslogs.service \n",
-								"sudo echo '[Unit]' >> awslogs.service \n",
-								"sudo echo 'Description=Service for CloudWatch Logs agent' >> awslogs.service \n",
-								"sudo echo 'After=rc-local.service' >> awslogs.service \n",
-								"sudo echo '[Service]' >> awslogs.service \n",
-								"sudo echo 'Type=simple' >> awslogs.service \n",
-								"sudo echo 'Restart=always' >> awslogs.service \n",
-								"sudo echo 'KillMode=process' >> awslogs.service \n",
-								"sudo echo 'TimeoutSec=infinity' >> awslogs.service \n",
-								"sudo echo 'PIDFile=/var/awslogs/state/awslogs.pid' >> awslogs.service \n",
-								"sudo echo 'ExecStart=/var/awslogs/bin/awslogs-agent-launcher.sh --start --background --pidfile $PIDFILE --user awslogs --chuid awslogs &amp;' >> awslogs.service \n",
-								"sudo echo '[Install]' >> awslogs.service \n",
-								"sudo echo 'WantedBy=multi-user.target' >> awslogs.service \n",
-								"sudo systemctl start awslogs.service \n",
-								"sudo systemctl enable awslogs.service \n"
+                                "sudo systemctl restart tomcat.service"
 							]
 						]
 					}
@@ -189,12 +190,14 @@
 						}
 					}
 				],
-				"Tags": [{
-					"Key": "Name",
-					"Value": {
-						"Ref": "EC2Name"
+				"Tags":[
+					{
+						"Key":"Name",
+						"Value":{
+							"Ref":"EC2Name"
+						}
 					}
-				}],
+				],
 				"SecurityGroupIds":[
 					{
 						"Ref":"EC2SecurityGroup"
@@ -253,6 +256,56 @@
 				}
 			}
 		},
+		"ourBucketPolicy":{
+			"Type":"AWS::S3::BucketPolicy",
+			"Properties":{
+				"Bucket":{
+					"Ref":"BucketName"
+				},
+				"PolicyDocument":{
+					"Version":"2012-10-17",
+					"Statement":[
+						{
+							"Effect":"Allow",
+							"Principal":"*",
+							"Action":"s3:ListBucket",
+							"Resource":{
+								"Fn::Join":[
+									"",
+									[
+										"arn:aws:s3:::",
+										{
+											"Ref":"BucketName"
+										}
+									]
+								]
+							}
+						},
+						{
+							"Effect":"Allow",
+							"Principal":"*",
+							"Action":[
+								"s3:PutObject",
+								"s3:GetObject",
+								"s3:DeleteObject"
+							],
+							"Resource":{
+								"Fn::Join":[
+									"",
+									[
+										"arn:aws:s3:::",
+										{
+											"Ref":"BucketName"
+										},
+										"/*"
+									]
+								]
+							}
+						}
+					]
+				}
+			}
+		},
 		"ourRDSDBSubnet":{
 			"Type":"AWS::RDS::DBSubnetGroup",
 			"Properties":{
@@ -298,6 +351,41 @@
 					{
 						"Ref":"RDSSecurityGroup"
 					}
+				]
+			}
+		}
+	},
+	"Outputs":{
+		"InstanceId":{
+			"Description":"InstanceId of the newly created EC2 instance",
+			"Value":{
+				"Ref":"ourEC2Instance"
+			}
+		},
+		"AZ":{
+			"Description":"Availability Zone of the newly created EC2 instance",
+			"Value":{
+				"Fn::GetAtt":[
+					"ourEC2Instance",
+					"AvailabilityZone"
+				]
+			}
+		},
+		"PublicDNS":{
+			"Description":"Public DNSName of the newly created EC2 instance",
+			"Value":{
+				"Fn::GetAtt":[
+					"ourEC2Instance",
+					"PublicDnsName"
+				]
+			}
+		},
+		"PublicIP":{
+			"Description":"Public IP address of the newly created EC2 instance",
+			"Value":{
+				"Fn::GetAtt":[
+					"ourEC2Instance",
+					"PublicIp"
 				]
 			}
 		}
