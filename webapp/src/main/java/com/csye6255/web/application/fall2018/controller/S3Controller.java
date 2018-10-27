@@ -186,7 +186,6 @@ public class S3Controller {
                                                 InputStream is = uploadReceiptFile.getInputStream();
                                                 String[] value =attachment1.getUrl().split("/"+env.getProperty("bucket.name"));
                                                 String[] keyValue = value[1].split("/");
-                                                //s3.putObject(new PutObjectRequest(env.getProperty("bucket.name"), keyValue[1], newFileName));
                                                 s3.putObject(new PutObjectRequest(env.getProperty("bucket.name"), keyValue[1], is, new ObjectMetadata()).withCannedAcl(CannedAccessControlList.PublicRead));
                                                 // Storing meta data in the DB: MSQL
                                                 String newUrl=S3BucketUtility.productRetrieveFileFromS3("",keyValue[1],env.getProperty("bucket.name"));
@@ -194,6 +193,8 @@ public class S3Controller {
                                                 attachmentDAO.save(attachment1);
                                             }
                                         }
+                                        jsonObject.addProperty("message", "Attachment Successfully updated!");
+                                        return ResponseEntity.status(HttpStatus.OK).body(jsonObject.toString());
                                            } catch (AmazonServiceException e) {
                                         System.err.println(e.getErrorMessage());
                                         jsonObject.addProperty("message", e.getErrorMessage());
@@ -218,8 +219,6 @@ public class S3Controller {
                 jsonObject.addProperty("message", "You are not logged in - Provide Username and Password!");
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(jsonObject.toString());
             }
-            jsonObject.addProperty("message", "Attachment Not Found");
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(jsonObject.toString());
         }
         else {
             jsonObject.addProperty("message", "You are not logged in - Provide Username and Password!");
