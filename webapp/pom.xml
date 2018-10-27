@@ -4,9 +4,9 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.csye6255.web.application</groupId>
-    <artifactId>fall2018</artifactId>
+    <artifactId>fall2018-plswork</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <packaging>jar</packaging>
+    <packaging>war</packaging>
 
     <name>fall2018</name>
     <description>Demo project for Spring Boot</description>
