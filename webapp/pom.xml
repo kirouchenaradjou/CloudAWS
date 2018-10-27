@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.csye6255.web.application</groupId>
-    <artifactId>fall2018-plswork</artifactId>
+    <artifactId>fall2018</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <packaging>war</packaging>
 
