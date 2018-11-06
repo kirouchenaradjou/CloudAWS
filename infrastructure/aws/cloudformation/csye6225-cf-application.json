@@ -79,25 +79,39 @@
                      [
                         "#!/bin/bash -xe ",
                         "sudo bash",
+                        "yum install httpd -y",
+                        "systemctl enable httpd.service",
+                        "systemctl start httpd.service",
+                        "yum update -y",
+                        "yum install ruby -y",
+                        "yum install wget -y",
+                        "yum install python -y",
+                        "wget https://aws-codedeploy-us-east-1.s3.amazonaws.com/latest/install",
+                        "chmod +x ./install",
+                        "./install auto",
+                        "service codedeploy-agent start",
+                        "mkdir -p /var/awslogs/etc/",
+                        "ar/awslogs/etc/ && sudo wget https://s3.amazonaws.com/aws-cloudwatch/downloads/latest/awslogs-agent-setup.py",
                         "yum install ruby ntp wget java-1.8.0-openjdk-devel -y",
                         "systemctl start ntpd",
                         "systemctl enable ntpd",
                         "groupadd tomcat",
                         "useradd -M -s /bin/nologin -g tomcat -d /opt/tomcat tomcat",
-                        "sudo wget https://aws-codedeploy-us-east-1.s3.amazonaws.com/latest/install",
-                        "sudo chmod +x ./install",
-                        "sudo ./install auto",
-                        "sudo service codedeploy-agent start",
                         "cd /tmp",
                         "wget http://apache.mirrors.pair.com/tomcat/tomcat-8/v8.5.34/bin/apache-tomcat-8.5.34.tar.gz",
                         "mkdir /opt/tomcat",
-                        "tar xvf apache-tomcat-8*tar.gz -C /opt/tomcat --strip-components=1",
+                        "sudo tar xvf apache-tomcat-8*tar.gz -C /opt/tomcat --strip-components=1",
                         "cd /opt/tomcat",
                         "chgrp -R tomcat /opt/tomcat",
                         "chmod -R g+r conf",
                         "chmod g+x conf",
                         "chown -R tomcat webapps/ work/ temp/ logs/",
-                        "cd /usr/lib/systemd/system",
+                        "cd /opt && sudo chown -R tomcat tomcat/",
+                        "#cd /usr/lib/systemd/system",
+                        "cd /opt/tomcat",
+                        "mkdir uploads",
+                        "chmod o+rwx uploads/",
+                        "cd /etc/systemd/system",
                         "touch tomcat.service",
                         "echo '[Unit]' > tomcat.service",
                         "echo 'Description=Apache Tomcat Web Application Container' >> tomcat.service",
@@ -119,20 +133,16 @@
                         "echo 'Restart=always' >> tomcat.service",
                         "echo '[Install]' >> tomcat.service",
                         "echo 'WantedBy=multi-user.target' >> tomcat.service",
-                        "systemctl daemon-reload",
-                        "#systemctl start cloudwatch.service",
-                        "#systemctl enable cloudwatch.service",
-                        "systemctl enable tomcat.service",
-                        "systemctl start tomcat.service",
+                        "#systemctl daemon-reload",
                         "cd /opt/tomcat/bin",
-                        "sudo touch setenv.sh",
-                        "sudo chmod 777 setenv.sh",
-                        "sudo echo '#!/bin/sh' >> setenv.sh",
+                        "touch setenv.sh",
+                        "echo 'JAVA_OPTS=\"-Djava.net.preferIPv4Stack=true -Djava.net.preferIPv4Addresses=true\"' >> setenv.sh",
+                        "echo 'JAVA_OPTS=\"$JAVA_OPTS -Dspring.profiles.active=Dev\"' >> setenv.sh",
                         {
                            "Fn::Join":[
                               "",
                               [
-                                 "sudo echo 'JAVA_OPTS=\"$JAVA_OPTS -Dspring.datasource.url=jdbc:mysql://",
+                                 "echo 'JAVA_OPTS=\"$JAVA_OPTS -Dspring.datasource.url=jdbc:mysql://",
                                  {
                                     "Fn::GetAtt":[
                                        "ourRDSInstance",
@@ -143,32 +153,16 @@
                               ]
                            ]
                         },
-                        {
-                           "Fn::Join":[
-                              "",
-                              [
-                                 "sudo echo 'JAVA_OPTS=\"$JAVA_OPTS -Dspring.datasource.username=",
-                                 {
-                                    "Ref":"MasterUsername"
-                                 },
-                                 "\"' >> setenv.sh \n"
-                              ]
-                           ]
-                        },
-                        {
-                           "Fn::Join":[
-                              "",
-                              [
-                                 "sudo echo 'JAVA_OPTS=\"$JAVA_OPTS -Dspring.datasource.password=",
-                                 {
-                                    "Ref":"MasterUserPwd"
-                                 },
-                                 "\"' >> setenv.sh \n"
-                              ]
-                           ]
-                        },
-                        "sudo echo 'JAVA_OPTS=\"$JAVA_OPTS -Dspring.profiles.active=aws\"' >> setenv.sh \n",
-                        "sudo systemctl restart tomcat.service"
+                        "echo 'JAVA_OPTS=\"$JAVA_OPTS -Dspring.datasource.username=csye6225master\"'  >> setenv.sh",
+                        "echo 'JAVA_OPTS=\"$JAVA_OPTS -Dspring.datasource.password=csye6225password\"'  >> setenv.sh",
+                        "#systemctl daemon-reload",
+                        "#systemctl start cloudwatch.service",
+                        "#systemctl enable cloudwatch.service",
+                        "systemctl enable tomcat.service",
+                        "systemctl start tomcat.service",
+                        "yum install mariadb mariadb-server -y",
+                        "systemctl enable mariadb.service",
+                        "systemctl start mariadb.service"
                      ]
                   ]
                }
@@ -253,56 +247,6 @@
             }
          }
       },
-      "ourBucketPolicy":{
-         "Type":"AWS::S3::BucketPolicy",
-         "Properties":{
-            "Bucket":{
-               "Ref":"BucketName"
-            },
-            "PolicyDocument":{
-               "Version":"2012-10-17",
-               "Statement":[
-                  {
-                     "Effect":"Allow",
-                     "Principal":"*",
-                     "Action":"s3:ListBucket",
-                     "Resource":{
-                        "Fn::Join":[
-                           "",
-                           [
-                              "arn:aws:s3:::",
-                              {
-                                 "Ref":"BucketName"
-                              }
-                           ]
-                        ]
-                     }
-                  },
-                  {
-                     "Effect":"Allow",
-                     "Principal":"*",
-                     "Action":[
-                        "s3:PutObject",
-                        "s3:GetObject",
-                        "s3:DeleteObject"
-                     ],
-                     "Resource":{
-                        "Fn::Join":[
-                           "",
-                           [
-                              "arn:aws:s3:::",
-                              {
-                                 "Ref":"BucketName"
-                              },
-                              "/*"
-                           ]
-                        ]
-                     }
-                  }
-               ]
-            }
-         }
-      },
       "ourRDSDBSubnet":{
          "Type":"AWS::RDS::DBSubnetGroup",
          "Properties":{
@@ -350,8 +294,13 @@
                }
             ]
          }
-      }
-   },
+      },
+      "ourSNSTopic" : {
+      	"Type" : "AWS::SNS::Topic",
+  		    "Properties" : {
+              "TopicName" : "ForgotPassword"
+          }
+      },
    "Outputs":{
       "InstanceId":{
          "Description":"InstanceId of the newly created EC2 instance",
