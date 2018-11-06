@@ -294,8 +294,13 @@
                }
             ]
          }
-      }
-   },
+      },
+      "ourSNSTopic" : {
+      	"Type" : "AWS::SNS::Topic",
+  		    "Properties" : {
+              "TopicName" : "ForgotPassword"
+          }
+      },
    "Outputs":{
       "InstanceId":{
          "Description":"InstanceId of the newly created EC2 instance",
