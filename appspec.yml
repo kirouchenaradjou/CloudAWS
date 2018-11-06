@@ -4,7 +4,6 @@ os: linux
 files:             
   - source: ./webapp/build/libs/ROOT.war
     destination: /opt/tomcat/webapps
-
 hooks:
   AfterInstall:
    - location: ./afterInstall.sh
