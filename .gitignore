@@ -91,7 +91,7 @@ env.bak/
 venv.bak/
 
 # Spyder project settings
-.spyderproject
+.spyderprojectgit status
 .spyproject
 
 # Rope project settings
@@ -112,3 +112,4 @@ webapp/fall2018.iml
 .idea/
 fall2018.iml
 workspace.xml
+webapp/.gradle
