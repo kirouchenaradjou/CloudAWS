@@ -1,6 +1,6 @@
 {
    "AWSTemplateFormatVersion":"2010-09-09",
-   "Description":"Creating IAM Policies, IAM Roles, S3 bucket and Code Deploy Application",
+   "Description":"Cloud Formation Template - Creating IAM Policies, IAM Roles, S3 bucket and Code Deploy Application",
    "Parameters":{
       "CodeDeployEC2ServiceRoleName":{
          "Type":"String"
