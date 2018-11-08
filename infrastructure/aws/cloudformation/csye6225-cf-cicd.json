@@ -135,7 +135,7 @@
             }
          }
       },
-      "MyPolicySNS":{
+      "ourPolicySNS":{
          "Type":"AWS::IAM::Policy",
          "Properties":{
             "PolicyName":{
@@ -254,6 +254,36 @@
                                     "Ref":"AWSAccountID"
                                  },
                                  "deploymentconfig:CodeDeployDefault.OneAtATime"
+                              ]
+                           ]
+                        },
+                        {
+                           "Fn::Join":[
+                              ":",
+                              [
+                                 "arn:aws:codedeploy",
+                                 {
+                                    "Ref":"AWSRegion"
+                                 },
+                                 {
+                                    "Ref":"AWSAccountID"
+                                 },
+                                 "deploymentconfig:CodeDeployDefault.HalfAtATime"
+                              ]
+                           ]
+                        },
+                        {
+                           "Fn::Join":[
+                              ":",
+                              [
+                                 "arn:aws:codedeploy",
+                                 {
+                                    "Ref":"AWSRegion"
+                                 },
+                                 {
+                                    "Ref":"AWSAccountID"
+                                 },
+                                 "deploymentconfig:CodeDeployDefault.AllAtOnce"
                               ]
                            ]
                         }
