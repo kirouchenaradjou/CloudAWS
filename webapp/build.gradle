@@ -45,22 +45,14 @@ dependencies {
     compile('org.springframework.boot:spring-boot-starter-actuator')
     compile('org.springframework.boot:spring-boot-actuator-docs')
     compile('org.springframework.boot:spring-boot-starter-mail')
-    compile('org.springframework.boot:spring-boot-starter-security')
     compile('org.springframework.session:spring-session')
     compile('org.springframework.boot:spring-boot-starter-web')
     compile('org.springframework.boot:spring-boot-starter-data-jpa')
-    compile('org.springframework.boot:spring-boot-starter-security')
     compile ('org.springframework.boot:spring-boot-starter-thymeleaf')
     // https://mvnrepository.com/artifact/commons-io/commons-io
     compile group: 'commons-io', name: 'commons-io', version: '2.4'
-
-    //thymeleaf html5 닫기 오류 처리 라이브러리
-    compile("net.sourceforge.nekohtml:nekohtml:1.9.22")
-    //thymeleaf html5
-    compile("org.thymeleaf.extras:thymeleaf-extras-springsecurity4:2.1.2.RELEASE")
-    compile("nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect:1.2.9")
-
-    compile('com.h2database:h2:+')
+    compile group: 'org.springframework.security', name: 'spring-security-crypto', version: '3.1.0.RELEASE'
+    
     compile ('com.amazonaws:aws-java-sdk-s3')
     compile 'com.amazonaws:aws-java-sdk-dynamodb'
     compile 'com.amazonaws:aws-java-sdk-sns'
@@ -77,7 +69,7 @@ dependencies {
 
     testCompile('io.rest-assured:rest-assured:3.0.3')
     testCompile('org.springframework.boot:spring-boot-starter-test')
-    testCompile('org.springframework.security:spring-security-test')
+    //testCompile('org.springframework.security:spring-security-test')
 }
 
 war {
