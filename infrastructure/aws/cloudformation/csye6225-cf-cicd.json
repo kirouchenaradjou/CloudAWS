@@ -377,6 +377,13 @@
             "DeploymentGroupName":{
                "Ref":"CodeDeployApplicationName"
             },
+            "Ec2TagFilters":[
+               {
+                  "Key":"Name",
+                  "Value":"csye6225-ec2",
+                  "Type":"KEY_AND_VALUE"
+               }
+            ],
             "ServiceRoleArn":{
                "Fn::GetAtt":[
                   "ourCodeDeployServiceRole",
