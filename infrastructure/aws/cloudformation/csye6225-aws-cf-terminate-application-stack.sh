@@ -1,9 +1,12 @@
 STACK_NAME=$1
 EC2_NAME=${STACK_NAME}-csye6225-ec2
 
-bucketName=$(aws s3api list-buckets --query "Buckets[].Name" --output text | grep me.csye6225.com)
+bucketName=$(aws s3api list-buckets --query "Buckets[].Name" --output text | grep me.csye6225.com | awk '{print $1}')
 echo $bucketName
-aws s3 rm s3://$bucketName --recursive
+if [ -n "$bucketName" ]
+then
+    aws s3 rm s3://$bucketName --recursive
+fi
 
 export ec2InstanceId=$(aws ec2 describe-instances --query 'Reservations[*].Instances[*].[InstanceId, State.Name, Tags[*][?Value==`${EC2_NAME}`]]' --output text|grep running|awk '{print $1}')
 
