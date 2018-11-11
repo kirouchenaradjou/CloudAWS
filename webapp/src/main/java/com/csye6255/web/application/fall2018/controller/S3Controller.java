@@ -8,6 +8,10 @@ import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
+import com.amazonaws.services.sns.AmazonSNS;
+import com.amazonaws.services.sns.AmazonSNSClientBuilder;
+import com.amazonaws.services.sns.model.PublishRequest;
+import com.amazonaws.services.sns.model.PublishResult;
 import com.csye6255.web.application.fall2018.dao.AttachmentDAO;
 import com.csye6255.web.application.fall2018.dao.TransactionDAO;
 import com.csye6255.web.application.fall2018.dao.UserDAO;
@@ -22,6 +26,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.env.Environment;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -308,5 +313,40 @@ public class S3Controller {
         jsonObject.addProperty("message", "Attachment Not Found");
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(jsonObject.toString());
     }
+
+        @RequestMapping( value = "/user/resetPassword", method = { RequestMethod.POST }, produces = {"application/json"} )
+        private ResponseEntity resetUserPassword(@RequestHeader HttpHeaders headers, HttpServletRequest request ) {
+            final String authorization = request.getHeader("Authorization");
+            JsonObject jsonObject = new JsonObject();
+            if (authorization != null && authorization.toLowerCase().startsWith("basic")) {
+                String[] values = AuthorizationUtility.getHeaderValues(authorization);
+                String userName = values[0];
+                String password = values[1];
+                BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+                List<User> userList = userDao.findByUserName(userName);
+                if ((userList.size() != 0)||(!(password != null && password.length() == 0))) {
+                    User user = userList.get(0);
+                    if (encoder.matches(password, user.getPassword())) {
+                        AmazonSNS snsClient = AmazonSNSClientBuilder.defaultClient();
+                        String resetEmail = user.getUserName();
+                        logger.info( "Reset Email: " + resetEmail );
+                        String topicArn = env.getProperty("sns.arn");
+                        PublishRequest publishRequest = new PublishRequest(topicArn, resetEmail);
+                        PublishResult publishResult = snsClient.publish(publishRequest);
+                        logger.info( "SNS Publish Result: " + publishResult );
+                        jsonObject.addProperty("message", "Password Reset Link was sent to your emailID");
+                        return ResponseEntity.status(HttpStatus.OK).body(jsonObject.toString());
+                        }
+                        else {
+                        return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
+                    }
+                    } else {
+                    jsonObject.addProperty("message", "Account does not exists for this user");
+                    return ResponseEntity.status(HttpStatus.OK).body(jsonObject.toString());
+                }
+                } else
+                    return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
+            }
+
 
 }
