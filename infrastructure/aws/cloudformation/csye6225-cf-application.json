@@ -61,6 +61,9 @@
       },
       "SNSTopicArn":{
          "Type":"String"
+      },
+      "LambdaRoleArn":{
+         "Type":"String"
       }
    },
    "Resources":{
@@ -204,12 +207,28 @@
                         },
                         "sudo echo 'JAVA_OPTS=\"$JAVA_OPTS -Dspring.profiles.active=aws\"' >> setenv.sh \n",
                         "systemctl daemon-reload",
-                        "wget https://s3.amazonaws.com/amazoncloudwatch-agent/centos/amd64/latest/amazon-cloudwatch-agent.rpm \n",
-                        "sudo rpm -U ./amazon-cloudwatch-agent.rpm",
-                        "#systemctl start cloudwatch.service",
-                        "#systemctl enable cloudwatch.service",
                         "systemctl enable tomcat.service",
                         "systemctl start tomcat.service",
+                        "wget https://s3.amazonaws.com/amazoncloudwatch-agent/centos/amd64/latest/amazon-cloudwatch-agent.rpm ",
+                        "sudo rpm -U ./amazon-cloudwatch-agent.rpm",
+                        "sudo /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -c file:/opt/cloudwatch-config.json -s",
+                        
+                        "cd /etc/systemd/system",
+                        "sudo touch cloudwatch.service",
+                        "sudo echo '[Unit]' >> cloudwatch.service",
+                        "sudo echo 'Description=Service for CloudWatch Logs agent' >> cloudwatch.service",
+                        "sudo echo 'After=rc-local.service' >> cloudwatch.service",
+                        "sudo echo '[Service]' >> cloudwatch.service",
+                        "sudo echo 'Type=simple' >> cloudwatch.service",
+                        "sudo echo 'Restart=always' >> cloudwatch.service",
+                        "sudo echo 'KillMode=process' >> cloudwatch.service",
+                        "sudo echo 'TimeoutSec=infinity' >> cloudwatch.service",
+                        "sudo echo 'PIDFile=/var/awslogs/state/awslogs.pid' >> cloudwatch.service",
+                        "sudo echo 'ExecStart=/var/awslogs/bin/awslogs-agent-launcher.sh --start --background --pidfile $PIDFILE --user awslogs --chuid awslogs &amp;' >> cloudwatch.service",
+                        "sudo echo '[Install]' >> cloudwatch.service",
+                        "sudo echo 'WantedBy=multi-user.target' >> cloudwatch.service",
+                        "sudo systemctl start cloudwatch.service",
+                        "sudo systemctl enable cloudwatch.service",
                         "yum install mariadb mariadb-server -y",
                         "systemctl enable mariadb.service",
                         "systemctl start mariadb.service"
@@ -250,7 +269,8 @@
             "IamInstanceProfile":{
                "Ref":"ourIAMInstanceProfile"
             }
-         }
+         },
+         "DependsOn":"ourRDSInstance"
       },
       "ourIAMInstanceProfile":{
          "Type":"AWS::IAM::InstanceProfile",
@@ -349,6 +369,37 @@
          "Type":"AWS::SNS::Topic",
          "Properties":{
             "TopicName":"ForgotPassword"
+         }
+      },
+      "ourLambdaFunction":{
+         "Type":"AWS::Lambda::Function",
+         "Properties":{
+            "Handler":"index.handler",
+            "Role":{
+               "Ref":"LambdaRoleArn"
+            },
+            "Code":{
+               "S3Bucket":"lambda.csye6225-fall2018-koonanim.me",
+               "S3Key":"LambdaFunction.zip"
+            },
+            "Runtime":"java8",
+            "Timeout":25,
+            "TracingConfig":{
+               "Mode":"Active"
+            }
+         }
+      },
+      "ourLambdaResourcePolicy":{
+         "Type":"AWS::Lambda::Permission",
+         "Properties":{
+            "FunctionName":{
+               "Ref":"ourLambdaFunction"
+            },
+            "Principal":"sns.amazonaws.com",
+            "Action":"lambda:InvokeFunction",
+            "SourceArn":{
+               "Ref":"ourSNSTopic"
+            }
          }
       }
    },
