@@ -4,13 +4,25 @@
    "Parameters":{
       "LambdaRoleArn":{
          "Type":"String"
+      },
+      "LambdaS3Bucket":{
+         "Type":"String"
       }
    },
    "Resources":{
       "ourSNSTopic":{
          "Type":"AWS::SNS::Topic",
          "Properties":{
-            "TopicName":"ForgotPassword"
+            "TopicName":"ForgotPassword",
+            "Subscription": [ {
+               "Endpoint":{
+               "Fn::GetAtt": [
+                  "ourLambdaFunction",
+                  "Arn"
+               ]
+            },
+            "Protocol": "lambda"
+         } ]
          },
          "DependsOn":"ourLambdaFunction"
       },
@@ -18,12 +30,14 @@
          "Type":"AWS::Lambda::Function",
          "Properties":{
             "FunctionName":"MyLambdaFunction",
-            "Handler":"index.handler",
+            "Handler":"LogEvent::handler",
             "Role":{
                "Ref":"LambdaRoleArn"
             },
             "Code":{
-               "S3Bucket":"",
+               "S3Bucket":{
+                  "Ref":"LambdaS3Bucket"
+               },
                "S3Key":"LambdaFunction.zip"
             },
             "Runtime":"java8",
@@ -31,7 +45,6 @@
          }
       },
       "ourLambdaResourcePolicy":{
-         "Type":"AWS::Lambda::Permission",
          "Properties":{
             "FunctionName":{
                "Fn::GetAtt": [
@@ -44,7 +57,8 @@
             "SourceArn": {
                "Ref":"ourSNSTopic"
             }
-         }
+         },
+        "Type":"AWS::Lambda::Permission"
       }
    }
 }
