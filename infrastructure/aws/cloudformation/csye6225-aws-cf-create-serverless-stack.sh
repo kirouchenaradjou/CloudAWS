@@ -3,7 +3,7 @@ STACK_NAME=$1
 export lambdaRoleArn=$(aws iam list-roles --query 'Roles[*].[RoleName, Arn]' --output text | grep Lambda |awk '{print $2}')
 echo "lambdaRoleArn : ${lambdaRoleArn}"
 
-aws cloudformation create-stack --stack-name $STACK_NAME --capabilities "CAPABILITY_NAMED_IAM" --template-body file://serverless.json --parameters ParameterKey=LambdaRoleArn,ParameterValue=$lambdaRoleArn
+aws cloudformation create-stack --stack-name $STACK_NAME --capabilities "CAPABILITY_NAMED_IAM" --template-body file://csye6225-cf-serverless.json --parameters ParameterKey=LambdaRoleArn,ParameterValue=$lambdaRoleArn
 
 export STACK_STATUS=$(aws cloudformation describe-stacks --stack-name $STACK_NAME --query "Stacks[][ [StackStatus ] ][]" --output text)
 
