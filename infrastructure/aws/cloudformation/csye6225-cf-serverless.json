@@ -1,0 +1,50 @@
+{
+   "AWSTemplateFormatVersion":"2010-09-09",
+   "Description":"Cloud Formation Template - CSYE6225 - Creating Lambda serverless stack",
+   "Parameters":{
+      "LambdaRoleArn":{
+         "Type":"String"
+      }
+   },
+   "Resources":{
+      "ourSNSTopic":{
+         "Type":"AWS::SNS::Topic",
+         "Properties":{
+            "TopicName":"ForgotPassword"
+         },
+         "DependsOn":"ourLambdaFunction"
+      },
+      "ourLambdaFunction":{
+         "Type":"AWS::Lambda::Function",
+         "Properties":{
+            "FunctionName":"MyLambdaFunction",
+            "Handler":"index.handler",
+            "Role":{
+               "Ref":"LambdaRoleArn"
+            },
+            "Code":{
+               "S3Bucket":"lambda.csye6225-fall2018-koonanim.me",
+               "S3Key":"LambdaFunction.zip"
+            },
+            "Runtime":"java8",
+            "Timeout":25
+         }
+      },
+      "ourLambdaResourcePolicy":{
+         "Type":"AWS::Lambda::Permission",
+         "Properties":{
+            "FunctionName":{
+               "Fn::GetAtt": [
+                  "ourLambdaFunction",
+                  "Arn"
+               ]
+            },
+            "Principal":"sns.amazonaws.com",
+            "Action":"lambda:InvokeFunction",
+            "SourceArn": {
+               "Ref":"ourSNSTopic"
+            }
+         }
+      }
+   }
+}

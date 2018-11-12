@@ -210,9 +210,10 @@
                         "systemctl enable tomcat.service",
                         "systemctl start tomcat.service",
                         "wget https://s3.amazonaws.com/amazoncloudwatch-agent/centos/amd64/latest/amazon-cloudwatch-agent.rpm ",
+                        "#aws s3api get-object --bucket lambda.csye6225-fall2018-koonanim.me --key cloudwatch-config.json /opt/cloudwatch-config.json",
                         "sudo rpm -U ./amazon-cloudwatch-agent.rpm",
                         "sudo /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -c file:/opt/cloudwatch-config.json -s",
-                        
+
                         "cd /etc/systemd/system",
                         "sudo touch cloudwatch.service",
                         "sudo echo '[Unit]' >> cloudwatch.service",
@@ -363,43 +364,6 @@
                   "Ref":"RDSSecurityGroup"
                }
             ]
-         }
-      },
-      "ourSNSTopic":{
-         "Type":"AWS::SNS::Topic",
-         "Properties":{
-            "TopicName":"ForgotPassword"
-         }
-      },
-      "ourLambdaFunction":{
-         "Type":"AWS::Lambda::Function",
-         "Properties":{
-            "Handler":"index.handler",
-            "Role":{
-               "Ref":"LambdaRoleArn"
-            },
-            "Code":{
-               "S3Bucket":"lambda.csye6225-fall2018-koonanim.me",
-               "S3Key":"LambdaFunction.zip"
-            },
-            "Runtime":"java8",
-            "Timeout":25,
-            "TracingConfig":{
-               "Mode":"Active"
-            }
-         }
-      },
-      "ourLambdaResourcePolicy":{
-         "Type":"AWS::Lambda::Permission",
-         "Properties":{
-            "FunctionName":{
-               "Ref":"ourLambdaFunction"
-            },
-            "Principal":"sns.amazonaws.com",
-            "Action":"lambda:InvokeFunction",
-            "SourceArn":{
-               "Ref":"ourSNSTopic"
-            }
          }
       }
    },
