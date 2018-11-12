@@ -23,7 +23,7 @@
                "Ref":"LambdaRoleArn"
             },
             "Code":{
-               "S3Bucket":"lambda.csye6225-fall2018-koonanim.me",
+               "S3Bucket":"",
                "S3Key":"LambdaFunction.zip"
             },
             "Runtime":"java8",
