@@ -21,6 +21,7 @@ import com.csye6255.web.application.fall2018.pojo.User;
 import com.csye6255.web.application.fall2018.utilities.AuthorizationUtility;
 import com.csye6255.web.application.fall2018.utilities.S3BucketUtility;
 import com.google.gson.JsonObject;
+import com.timgroup.statsd.StatsDClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,11 +63,14 @@ public class S3Controller {
     @Autowired
     private Environment env;
 
+    @Autowired
+    private StatsDClient statsDClient;
 
     @RequestMapping(value = "/transaction/{transactionid}/attachments", method = RequestMethod.POST, produces = {"application/json"})
     @ResponseBody
     public ResponseEntity attachFilesToTransaction(@PathVariable("transactionid") String transactionid,
                                                    HttpServletRequest request, @RequestParam("uploadReceipt") MultipartFile uploadReceiptFile) throws FileNotFoundException, IOException {
+        statsDClient.incrementCounter("endpoint.test.http.post");
         JsonObject jsonObject = new JsonObject();
         final String authorization = request.getHeader("Authorization");
         if (authorization != null && authorization.toLowerCase().startsWith("basic")) {
@@ -151,6 +155,7 @@ public class S3Controller {
     public ResponseEntity replaceAttachmentInTransaction(@PathVariable("transactionid") String transactionid,
                                             @PathVariable("attachmentid") String attachmentid, HttpServletRequest request,
                                             @RequestParam("uploadReceipt") MultipartFile uploadReceiptFile) throws FileNotFoundException, IOException {
+        statsDClient.incrementCounter("endpoint.test.http.put");
         JsonObject jsonObject = new JsonObject();
         final String authorization = request.getHeader("Authorization");
         if (authorization != null && authorization.toLowerCase().startsWith("basic")) {
@@ -235,6 +240,7 @@ public class S3Controller {
     @ResponseBody
     public ResponseEntity deleteAttachment(@PathVariable("transactionid") String transactionid,
                                            @PathVariable("attachmentid") String attachmentid, HttpServletRequest request) throws FileNotFoundException, IOException {
+        statsDClient.incrementCounter("endpoint.test.http.delete");
         JsonObject jsonObject = new JsonObject();
         final String authorization = request.getHeader("Authorization");
         if (authorization != null && authorization.toLowerCase().startsWith("basic")) {
@@ -316,7 +322,8 @@ public class S3Controller {
 
         @RequestMapping( value = "/user/resetPassword", method = { RequestMethod.POST }, produces = {"application/json"} )
         private ResponseEntity resetUserPassword(@RequestHeader HttpHeaders headers, HttpServletRequest request ) {
-            final String authorization = request.getHeader("Authorization");
+        statsDClient.incrementCounter("endpoint.test.http.post");
+        final String authorization = request.getHeader("Authorization");
             JsonObject jsonObject = new JsonObject();
             if (authorization != null && authorization.toLowerCase().startsWith("basic")) {
                 String[] values = AuthorizationUtility.getHeaderValues(authorization);
