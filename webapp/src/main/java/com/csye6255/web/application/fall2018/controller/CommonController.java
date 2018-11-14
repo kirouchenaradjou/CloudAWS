@@ -10,6 +10,7 @@ import com.csye6255.web.application.fall2018.pojo.User;
 import com.csye6255.web.application.fall2018.utilities.AuthorizationUtility;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
+import com.timgroup.statsd.StatsDClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,12 +46,14 @@ public class CommonController {
     @Autowired
     AttachmentDAO attachmentDAO;
 
+    @Autowired
+    private StatsDClient statsDClient;
 
     @RequestMapping(value = "/user/register", method = RequestMethod.POST, produces = {"application/json"},
             consumes = "application/json", headers = {"content-type=application/json; charset=utf-8"})
     @ResponseBody
     public ResponseEntity postRegister(@RequestBody User user) {
-
+        statsDClient.incrementCounter("endpoint.test.http.post");
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
         JsonObject jsonObject = new JsonObject();
@@ -91,7 +94,7 @@ public class CommonController {
     @ResponseBody
     public String postLogin(@RequestBody User user) {
 
-
+        statsDClient.incrementCounter("endpoint.test.http.post");
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
         JsonObject jsonObject = new JsonObject();
@@ -124,6 +127,7 @@ public class CommonController {
     @RequestMapping(value = "/time", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
     public String checkSession(@RequestHeader HttpHeaders headers, HttpServletRequest request) {
+        statsDClient.incrementCounter("endpoint.test.http.get");
         JsonObject jsonObject = new JsonObject();
         final String authorization = request.getHeader("Authorization");
         if (authorization != null && authorization.toLowerCase().startsWith("basic")) {
@@ -160,6 +164,7 @@ public class CommonController {
 
     @ResponseBody
     public ResponseEntity getTransactions(@RequestHeader HttpHeaders headers, HttpServletRequest request) {
+        statsDClient.incrementCounter("endpoint.test.http.get");
         final String authorization = request.getHeader("Authorization");
         JsonObject jsonObject = new JsonObject();
         if (authorization != null && authorization.toLowerCase().startsWith("basic")) {
@@ -227,6 +232,7 @@ public class CommonController {
             consumes = "application/json", headers = {"content-type=application/json; charset=utf-8"})
     @ResponseBody
     public ResponseEntity createTransactions(HttpServletRequest request, @RequestBody Transaction transaction) {
+        statsDClient.incrementCounter("endpoint.test.http.post");
         JsonObject jsonObject = new JsonObject();
         final String authorization = request.getHeader("Authorization");
         if (authorization != null && authorization.toLowerCase().startsWith("basic")) {
@@ -286,6 +292,7 @@ public class CommonController {
     @ResponseBody
     public ResponseEntity getAttachmentsByTransactionID(@PathVariable("transactionid") String transactionid, @RequestHeader HttpHeaders headers,
                                                         HttpServletRequest request) {
+        statsDClient.incrementCounter("endpoint.test.http.get");
         final String authorization = request.getHeader("Authorization");
         JsonObject jsonObject = new JsonObject();
         if (authorization != null && authorization.toLowerCase().startsWith("basic")) {

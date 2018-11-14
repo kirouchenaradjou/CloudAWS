@@ -1,0 +1,42 @@
+{
+   "AWSTemplateFormatVersion":"2010-09-09",
+   "Description":"Cloud Formation Template - CSYE6225 - Creating Lambda serverless stack",
+   "Parameters":{
+      "LambdaRoleArn":{
+         "Type":"String"
+      },
+      "LambdaS3Bucket":{
+         "Type":"String"
+      },
+      "LambdaArn":{
+         "Type":"String"
+      }
+   },
+   "Resources":{
+      "ourSNSTopic":{
+         "Type":"AWS::SNS::Topic",
+         "Properties":{
+            "TopicName":"ForgotPassword",
+            "Subscription": [ {
+               "Endpoint":{
+               "Ref" : "LambdaArn"
+            },
+            "Protocol": "lambda"
+         } ]
+         }
+      },
+      "ourLambdaResourcePolicy":{
+         "Properties":{
+            "FunctionName":{
+               "Ref" : "LambdaArn"
+            },
+            "Principal":"sns.amazonaws.com",
+            "Action":"lambda:InvokeFunction",
+            "SourceArn": {
+               "Ref":"ourSNSTopic"
+            }
+         },
+        "Type":"AWS::Lambda::Permission"
+      }
+   }
+}

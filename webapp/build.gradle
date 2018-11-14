@@ -61,6 +61,8 @@ dependencies {
     compile('org.apache.httpcomponents:httpclient:+')
     compile('com.google.code.gson:gson:+')
     compile('mysql:mysql-connector-java:5.1.44')
+    compile('com.timgroup:java-statsd-client:3.0.1')
+
 
     runtime('org.springframework.boot:spring-boot-devtools')
     runtime('mysql:mysql-connector-java:5.1.44')
