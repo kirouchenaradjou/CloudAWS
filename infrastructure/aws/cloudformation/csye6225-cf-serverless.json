@@ -7,9 +7,6 @@
       },
       "LambdaS3Bucket":{
          "Type":"String"
-      },
-      "LambdaArn":{
-         "Type":"String"
       }
    },
    "Resources":{
@@ -19,24 +16,49 @@
             "TopicName":"ForgotPassword",
             "Subscription": [ {
                "Endpoint":{
-               "Ref" : "LambdaArn"
+                  "Fn::GetAtt": [
+                     "ourLambdaFunction",
+                     "Arn"
+                  ]
+               },
+               "Protocol": "lambda"
+            } ]
+         },
+         "DependsOn":"ourLambdaFunction"
+      },
+      "ourLambdaFunction":{
+         "Type":"AWS::Lambda::Function",
+         "Properties":{
+            "FunctionName":"MyLambdaFunction",
+            "Handler":"LogEvent::handler",
+            "Role":{
+               "Ref":"LambdaRoleArn"
             },
-            "Protocol": "lambda"
-         } ]
+            "Code":{
+               "S3Bucket":{
+                  "Ref":"LambdaS3Bucket"
+               },
+               "S3Key":"csye6225-fall2018-lambda-0.0.1.zip"
+            },
+            "Runtime":"java8",
+            "Timeout":25
          }
       },
       "ourLambdaResourcePolicy":{
+         "Type":"AWS::Lambda::Permission",
          "Properties":{
             "FunctionName":{
-               "Ref" : "LambdaArn"
+               "Fn::GetAtt": [
+                  "ourLambdaFunction",
+                  "Arn"
+               ]
             },
             "Principal":"sns.amazonaws.com",
             "Action":"lambda:InvokeFunction",
             "SourceArn": {
                "Ref":"ourSNSTopic"
             }
-         },
-        "Type":"AWS::Lambda::Permission"
+         }
       }
    }
 }
