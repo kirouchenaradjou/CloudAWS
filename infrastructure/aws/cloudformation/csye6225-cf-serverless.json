@@ -7,6 +7,9 @@
       },
       "LambdaS3Bucket":{
          "Type":"String"
+      },
+      "LambdaArn":{
+         "Type":"String"
       }
    },
    "Resources":{
@@ -16,41 +19,16 @@
             "TopicName":"ForgotPassword",
             "Subscription": [ {
                "Endpoint":{
-               "Fn::GetAtt": [
-                  "ourLambdaFunction",
-                  "Arn"
-               ]
+               "Ref" : "LambdaArn"
             },
             "Protocol": "lambda"
          } ]
-         },
-         "DependsOn":"ourLambdaFunction"
-      },
-      "ourLambdaFunction":{
-         "Type":"AWS::Lambda::Function",
-         "Properties":{
-            "FunctionName":"MyLambdaFunction",
-            "Handler":"LogEvent::handler",
-            "Role":{
-               "Ref":"LambdaRoleArn"
-            },
-            "Code":{
-               "S3Bucket":{
-                  "Ref":"LambdaS3Bucket"
-               },
-               "S3Key":"LambdaFunction.zip"
-            },
-            "Runtime":"java8",
-            "Timeout":25
          }
       },
       "ourLambdaResourcePolicy":{
          "Properties":{
             "FunctionName":{
-               "Fn::GetAtt": [
-                  "ourLambdaFunction",
-                  "Arn"
-               ]
+               "Ref" : "LambdaArn"
             },
             "Principal":"sns.amazonaws.com",
             "Action":"lambda:InvokeFunction",
