@@ -209,8 +209,19 @@
                         "systemctl daemon-reload",
                         "systemctl enable tomcat.service",
                         "systemctl start tomcat.service",
-                        "wget https://s3.amazonaws.com/amazoncloudwatch-agent/centos/amd64/latest/amazon-cloudwatch-agent.rpm ",
-                        "#aws s3api get-object --bucket lambda.csye6225-fall2018-koonanim.me --key cloudwatch-config.json /opt/cloudwatch-config.json",
+                        "wget https://s3.amazonaws.com/amazoncloudwatch-agent/centos/amd64/latest/amazon-cloudwatch-agent.rpm \n",
+                        {
+                           "Fn::Join":[
+                              "",
+                              [
+                                 "aws s3api get-object --bucket ",
+                                 {
+                                    "Ref":"BucketName"
+                                 },
+                                 "--key cloudwatch-config.json /opt/cloudwatch-config.json \n"
+                              ]
+                           ]
+                        },
                         "sudo rpm -U ./amazon-cloudwatch-agent.rpm",
                         "sudo /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -c file:/opt/cloudwatch-config.json -s",
 
