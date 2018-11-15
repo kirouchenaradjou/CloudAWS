@@ -11,8 +11,14 @@ DB_NAME="csye6225"
 DB_INSTANCE_CLASS="db.t2.medium"
 DB_INSTANCE_IDENTIFIER="csye6225-fall2018"
 DB_ENGINE="MySQL"
-BUCKET_NAME=""
 SNSTOPICNAME="ForgotPassword"
+
+DOMAINNAME=$(aws route53 list-hosted-zones --query HostedZones[0].Name --output text)
+DNS=${DOMAINNAME#csye6225-fall2018-}
+echo $DNS
+
+BUCKET_NAME="${DNS}csye6225.com"
+echo $BUCKET_NAME
 
 export vpcId=$(aws ec2 describe-vpcs --query "Vpcs[*].[CidrBlock, VpcId]" --output text|grep 10.0.0.0/16|awk '{print $2}')
 echo "VpcId : ${vpcId}"

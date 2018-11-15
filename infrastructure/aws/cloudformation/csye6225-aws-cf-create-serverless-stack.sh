@@ -1,5 +1,12 @@
 STACK_NAME=$1
-LambdaS3Bucket=""
+
+
+DOMAINNAME=$(aws route53 list-hosted-zones --query HostedZones[0].Name --output text)
+DNS=${DOMAINNAME::-1}
+echo $DNS
+
+LambdaS3Bucket="lambda.${DNS}"
+echo $LambdaS3Bucket
 
 export lambdaRoleArn=$(aws iam list-roles --query 'Roles[*].[RoleName, Arn]' --output text | grep Lambda |awk '{print $2}')
 echo "lambdaRoleArn : ${lambdaRoleArn}"
