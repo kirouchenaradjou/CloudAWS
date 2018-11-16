@@ -229,6 +229,7 @@
                            ]
                         },
                         "sudo ./amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -c file:/opt/aws/amazon-cloudwatch-agent/bin/cloudwatch-config.json -s",
+                        "systemctl daemon-reload",
                         "systemctl start amazon-cloudwatch-agent.service",
                         "systemctl stop amazon-cloudwatch-agent.service",
                         "systemctl restart amazon-cloudwatch-agent.service",
