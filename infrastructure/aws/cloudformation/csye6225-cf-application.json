@@ -209,8 +209,13 @@
                         "systemctl daemon-reload",
                         "systemctl enable tomcat.service",
                         "systemctl start tomcat.service",
-                        "wget https://s3.amazonaws.com/amazoncloudwatch-agent/centos/amd64/latest/amazon-cloudwatch-agent.rpm \n",
+
                         "yum install awscli -y",
+                        "mkdir -p /var/awslogs/etc/",
+                        "cd /var/awslogs/etc/",
+                        "sudo wget https://s3.amazonaws.com/amazoncloudwatch-agent/centos/amd64/latest/amazon-cloudwatch-agent.rpm",
+                        "sudo rpm -U ./amazon-cloudwatch-agent.rpm",
+                        "cd /opt/aws/amazon-cloudwatch-agent/bin/",
                         {
                            "Fn::Join":[
                               "",
@@ -219,29 +224,16 @@
                                  {
                                     "Ref":"BucketName"
                                  },
-                                 "--key cloudwatch-config.json /opt/cloudwatch-config.json \n"
+                                 "--key cloudwatch-config.json cloudwatch-config.json \n"
                               ]
                            ]
                         },
-                        "sudo rpm -U ./amazon-cloudwatch-agent.rpm",
-                        "sudo /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -c file:/opt/cloudwatch-config.json -s",
+                        "sudo ./amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -c file:/opt/aws/amazon-cloudwatch-agent/bin/cloudwatch-config.json -s",
+                        "systemctl daemon-reload",
+                        "systemctl start amazon-cloudwatch-agent.service",
+                        "systemctl stop amazon-cloudwatch-agent.service",
+                        "systemctl restart amazon-cloudwatch-agent.service",
 
-                        "cd /etc/systemd/system",
-                        "sudo touch cloudwatch.service",
-                        "sudo echo '[Unit]' >> cloudwatch.service",
-                        "sudo echo 'Description=Service for CloudWatch Logs agent' >> cloudwatch.service",
-                        "sudo echo 'After=rc-local.service' >> cloudwatch.service",
-                        "sudo echo '[Service]' >> cloudwatch.service",
-                        "sudo echo 'Type=simple' >> cloudwatch.service",
-                        "sudo echo 'Restart=always' >> cloudwatch.service",
-                        "sudo echo 'KillMode=process' >> cloudwatch.service",
-                        "sudo echo 'TimeoutSec=infinity' >> cloudwatch.service",
-                        "sudo echo 'PIDFile=/var/awslogs/state/awslogs.pid' >> cloudwatch.service",
-                        "sudo echo 'ExecStart=/var/awslogs/bin/awslogs-agent-launcher.sh --start --background --pidfile $PIDFILE --user awslogs --chuid awslogs &amp;' >> cloudwatch.service",
-                        "sudo echo '[Install]' >> cloudwatch.service",
-                        "sudo echo 'WantedBy=multi-user.target' >> cloudwatch.service",
-                        "sudo systemctl start cloudwatch.service",
-                        "sudo systemctl enable cloudwatch.service",
                         "yum install mariadb mariadb-server -y",
                         "systemctl enable mariadb.service",
                         "systemctl start mariadb.service"

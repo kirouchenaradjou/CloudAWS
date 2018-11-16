@@ -97,7 +97,8 @@
                               "tag:GetResources",
                               "sns:Publish",
                               "cloudwatch:DescribeAlarms",
-                              "cloudwatch:PutMetricAlarm"
+                              "cloudwatch:PutMetricAlarm",
+                              "cloudwatch:PutMetricData"
                            ],
                            "Resource":[
                               "*"
