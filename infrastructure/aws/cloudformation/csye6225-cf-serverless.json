@@ -30,7 +30,7 @@
          "Type":"AWS::Lambda::Function",
          "Properties":{
             "FunctionName":"MyLambdaFunction",
-            "Handler":"LogEvent::handler",
+            "Handler":"LogEvent::handleRequest",
             "Role":{
                "Ref":"LambdaRoleArn"
             },
