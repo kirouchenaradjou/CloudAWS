@@ -41,7 +41,8 @@
                "S3Key":"csye6225-fall2018-lambda-0.0.1.zip"
             },
             "Runtime":"java8",
-            "Timeout":25
+            "Timeout":25,
+            "MemorySize":256
          }
       },
       "ourLambdaResourcePolicy":{
