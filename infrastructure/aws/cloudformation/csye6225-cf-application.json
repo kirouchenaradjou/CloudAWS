@@ -96,8 +96,6 @@
                         "chmod +x ./install",
                         "./install auto",
                         "service codedeploy-agent start",
-                        "mkdir -p /var/awslogs/etc/",
-                        "ar/awslogs/etc/ && sudo wget https://s3.amazonaws.com/aws-cloudwatch/downloads/latest/awslogs-agent-setup.py",
                         "yum install ruby ntp wget java-1.8.0-openjdk-devel -y",
                         "systemctl start ntpd",
                         "systemctl enable ntpd",
@@ -113,7 +111,6 @@
                         "chmod g+x conf",
                         "chown -R tomcat webapps/ work/ temp/ logs/",
                         "cd /opt && sudo chown -R tomcat tomcat/",
-                        "#cd /usr/lib/systemd/system",
                         "cd /opt/tomcat",
                         "mkdir uploads",
                         "chmod o+rwx uploads/",
@@ -209,31 +206,18 @@
                         "systemctl daemon-reload",
                         "systemctl enable tomcat.service",
                         "systemctl start tomcat.service",
-
-                        "yum install awscli -y",
                         "mkdir -p /var/awslogs/etc/",
                         "cd /var/awslogs/etc/",
                         "sudo wget https://s3.amazonaws.com/amazoncloudwatch-agent/centos/amd64/latest/amazon-cloudwatch-agent.rpm",
                         "sudo rpm -U ./amazon-cloudwatch-agent.rpm",
                         "cd /opt/aws/amazon-cloudwatch-agent/bin/",
-                        {
-                           "Fn::Join":[
-                              "",
-                              [
-                                 "aws s3api get-object --bucket ",
-                                 {
-                                    "Ref":"BucketName"
-                                 },
-                                 "--key cloudwatch-config.json cloudwatch-config.json \n"
-                              ]
-                           ]
-                        },
+                        "touch cloudwatch-config.json",
+                        "echo '{\"agent\": {\"metrics_collection_interval\": 10,\"logfile\": \"/var/logs/amazon-cloudwatch-agent.log\"},\"logs\": {\"logs_collected\": {\"files\": {\"collect_list\": [{\"file_path\": \"/opt/tomcat/logs/catalina.out\",\"log_group_name\": \"csye6225_fall2018\",\"log_stream_name\": \"webapp\",\"timestamp_format\": \"%H:%M:%S %y %b %-d\"}]}}},\"metrics\": {\"metrics_collected\": {\"statsd\": {\"service_address\": \":8125\",\"metrics_collection_interval\": 10,\"metrics_aggregation_interval\": 0}}}}' >> cloudwatch-config.json",
                         "sudo ./amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -c file:/opt/aws/amazon-cloudwatch-agent/bin/cloudwatch-config.json -s",
                         "systemctl daemon-reload",
                         "systemctl start amazon-cloudwatch-agent.service",
                         "systemctl stop amazon-cloudwatch-agent.service",
                         "systemctl restart amazon-cloudwatch-agent.service",
-
                         "yum install mariadb mariadb-server -y",
                         "systemctl enable mariadb.service",
                         "systemctl start mariadb.service"
