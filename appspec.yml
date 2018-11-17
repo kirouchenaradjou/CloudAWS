@@ -2,9 +2,8 @@ version: 0.0
 os: linux
 
 files:             
-  - source: ./webapp/target/fall2018-0.0.1-SNAPSHOT.war
+  - source: ./webapp/build/libs/ROOT.war
     destination: /opt/tomcat/webapps
-
 hooks:
   AfterInstall:
    - location: ./afterInstall.sh
