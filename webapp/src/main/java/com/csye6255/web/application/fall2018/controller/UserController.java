@@ -45,64 +45,6 @@ public class UserController {
     @Autowired
     AttachmentDAO attachmentDAO;
 
-    @RequestMapping(value = "/transaction", method = RequestMethod.POST, produces = {"application/json"},
-            consumes = "application/json", headers = {"content-type=application/json; charset=utf-8"})
-    @ResponseBody
-    public ResponseEntity createTransactions(HttpServletRequest request, @RequestBody Transaction transaction) {
-        JsonObject jsonObject = new JsonObject();
-        final String authorization = request.getHeader("Authorization");
-        if (authorization != null && authorization.toLowerCase().startsWith("basic")) {
-            String[] values = AuthorizationUtility.getHeaderValues(authorization);
-            String userName = values[0];
-            String password = values[1];
-            BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-            List<User> userList = userDao.findByUserName(userName);
-
-
-            if ((userList.size() != 0)||(!(password != null && password.length() == 0))) {
-                User user = userList.get(0);
-                if (encoder.matches(password, user.getPassword())) {
-                    if (transaction.getDescription() != null && transaction.getAmount() != null
-                            && transaction.getDate() != null && transaction.getMerchant() != null && transaction.getCategory() != null) {
-                        Transaction t = new Transaction();
-                        Attachment attachment = new Attachment();
-                        t.setTransactionid(transaction.getTransactionid());
-                        t.setDescription(transaction.getDescription());
-                        t.setAmount(transaction.getAmount());
-                        t.setDate(transaction.getDate());
-                        t.setMerchant(transaction.getMerchant());
-                        t.setCategory(transaction.getCategory());
-                        t.setUser(user);
-                        transactionDAO.save(t);
-                        if (transaction.getAttachments() != null) {
-                            attachment.setUrl(transaction.getAttachments().get(0).getUrl());
-                            attachment.setTransaction(t);
-                            attachmentDAO.save(attachment);
-                        }
-                        jsonObject.addProperty("message", "Transaction  Successful");
-                        return ResponseEntity.status(HttpStatus.CREATED).body(jsonObject.toString());
-                    } else {
-                        jsonObject.addProperty("message", "Transaction not successful - Provide id,desc,amount,date,merchant,category");
-                        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(jsonObject.toString());
-
-                    }
-                } else {
-                    jsonObject.addProperty("message", "Incorrect Password");
-                    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(jsonObject.toString());
-                }
-
-
-            } else {
-                jsonObject.addProperty("message", "User not found! - Try Logging in again");
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(jsonObject.toString());
-            }
-
-        } else {
-            jsonObject.addProperty("message", "You are not logged in - Provide Username and Password!");
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(jsonObject.toString());
-
-        }
-    }
 
     @RequestMapping(value = "/transaction/{transactionid}", method = RequestMethod.DELETE, headers = {"content-type=application/json; charset=utf-8"})
     @ResponseBody
@@ -423,7 +365,6 @@ public class UserController {
             jsonObject.addProperty("message", "You are not logged in - Provide Username and Password!");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(jsonObject.toString());
         }
-        //jsonObject.addProperty("message", "Attachment Not Found");
-        //return ResponseEntity.status(HttpStatus.OK).body(jsonObject.toString());
+
     }
 }
