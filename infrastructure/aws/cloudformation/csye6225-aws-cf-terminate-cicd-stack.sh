@@ -1,10 +1,14 @@
 STACK_NAME=$1
 
-bucketName=$(aws s3api list-buckets --query "Buckets[].Name" --output text | grep code-deploy.csye6225-fall2018 | awk '{print $1}')
+DOMAINNAME=$(aws route53 list-hosted-zones --query HostedZones[0].Name --output text)
+DNS=${DOMAINNAME::-1}
+echo $DNS
+
+bucketName=code-deploy.$DNS
 echo $bucketName
-if [ -n "$bucketName" ]
+if [ -n "$bucketName"]
 then
-    aws s3 rm s3://$bucketName --recursive
+aws s3 rm s3://$bucketName/ --recursive
 fi
 
 aws cloudformation delete-stack --stack-name $STACK_NAME
