@@ -12,7 +12,7 @@ CLOUDWATCHPOLICY="Cloud-Watch-Policy"
 SNSPOLICY="SNS-Policy"
 
 export AWSACCOUNTID=$(aws sts get-caller-identity --query "Account" --output text)
-echo "AWS Account ID: ${AWSACCOUNTID}"
+
 
 DOMAINNAME=$(aws route53 list-hosted-zones --query HostedZones[0].Name --output text)
 DNS=${DOMAINNAME::-1}
