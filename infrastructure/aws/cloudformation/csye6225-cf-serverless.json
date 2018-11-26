@@ -7,6 +7,12 @@
       },
       "LambdaS3Bucket":{
          "Type":"String"
+      },
+      "FromEmailAddress":{
+         "Type":"String"
+      },
+      "DNS":{
+         "Type":"String"
       }
    },
    "Resources":{
@@ -30,7 +36,7 @@
          "Type":"AWS::Lambda::Function",
          "Properties":{
             "FunctionName":"MyLambdaFunction",
-            "Handler":"LogEvent::handler",
+            "Handler":"LogEvent::handleRequest",
             "Role":{
                "Ref":"LambdaRoleArn"
             },
@@ -40,8 +46,16 @@
                },
                "S3Key":"csye6225-fall2018-lambda-0.0.1.zip"
             },
+            "Environment":{
+               "Variables":{
+               "DomainName":{"Ref":"DNS"},
+               "DynamoDBTableName":"csye6225",
+               "FromEmailAddress":{"Ref":"FromEmailAddress"}
+            }
+            },
             "Runtime":"java8",
-            "Timeout":25
+            "Timeout":25,
+            "MemorySize":256
          }
       },
       "ourLambdaResourcePolicy":{
