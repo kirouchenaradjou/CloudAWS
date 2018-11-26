@@ -8,10 +8,14 @@ echo $DNS
 LambdaS3Bucket="lambda.${DNS}"
 echo $LambdaS3Bucket
 
+FromEmailAddress="noreply@${DNS}"
+echo $FromEmailAddress
+
+
 export lambdaRoleArn=$(aws iam list-roles --query 'Roles[*].[RoleName, Arn]' --output text | grep Lambda |awk '{print $2}')
 echo "lambdaRoleArn : ${lambdaRoleArn}"
 
-aws cloudformation create-stack --stack-name $STACK_NAME --capabilities "CAPABILITY_NAMED_IAM" --template-body file://csye6225-cf-serverless.json --parameters ParameterKey=LambdaRoleArn,ParameterValue=$lambdaRoleArn ParameterKey=LambdaS3Bucket,ParameterValue=$LambdaS3Bucket
+aws cloudformation create-stack --stack-name $STACK_NAME --capabilities "CAPABILITY_NAMED_IAM" --template-body file://csye6225-cf-serverless.json --parameters ParameterKey=LambdaRoleArn,ParameterValue=$lambdaRoleArn ParameterKey=LambdaS3Bucket,ParameterValue=$LambdaS3Bucket ParameterKey=FromEmailAddress,ParameterValue=$FromEmailAddress ParameterKey=DNS,ParameterValue=$DNS
 
 export STACK_STATUS=$(aws cloudformation describe-stacks --stack-name $STACK_NAME --query "Stacks[][ [StackStatus ] ][]" --output text)
 
