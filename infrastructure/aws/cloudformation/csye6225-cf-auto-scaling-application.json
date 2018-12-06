@@ -152,7 +152,7 @@
                         "chmod o+rwx uploads/",
                         "cd /etc/systemd/system",
                         "touch tomcat.service",
-                        "echo '[Unit]' > tomcat.service",
+                        "echo '[Unit]' >> tomcat.service",
                         "echo 'Description=Apache Tomcat Web Application Container' >> tomcat.service",
                         "echo 'After=syslog.target network.target' >> tomcat.service",
                         "echo '[Service]' >> tomcat.service",
@@ -286,7 +286,7 @@
             "Tags":[
                {
                   "Key":"Name",
-                  "Value":"csye6225",
+                  "Value":{"Ref":"EC2Name"},
                   "PropagateAtLaunch":true
                }
             ],
@@ -730,7 +730,7 @@
             "Ec2TagFilters":[
                {
                   "Key":"Name",
-                  "Value":"csye6225-ec2",
+                  "Value":{"Ref":"EC2Name"},
                   "Type":"KEY_AND_VALUE"
                }
             ],
