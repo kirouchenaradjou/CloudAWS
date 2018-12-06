@@ -354,7 +354,6 @@
       },
       "Listener2" : {
         "Type" : "AWS::ElasticLoadBalancingV2::Listener",
-        "DependsOn":["ourTargetGroup","ourLoadBalancer"],
         "Properties" : {
 
           "DefaultActions" : [{
@@ -366,7 +365,7 @@
             }
           }],
           "LoadBalancerArn" : { "Ref" : "ourLoadBalancer" },
-          "Port" : "8080",
+          "Port" : "80",
           "Protocol" : "HTTP"
 
         }
