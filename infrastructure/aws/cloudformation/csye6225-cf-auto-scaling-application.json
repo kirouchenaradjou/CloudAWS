@@ -5,9 +5,6 @@
       "EC2Name":{
          "Type":"String"
       },
-      "EC2SecurityGroup":{
-         "Type":"String"
-      },
       "EC2InstanceType":{
          "Type":"String"
       },
@@ -54,9 +51,6 @@
          "Type":"String"
       },
       "SubnetId3":{
-         "Type":"String"
-      },
-      "RDSSecurityGroup":{
          "Type":"String"
       },
       "EC2RoleName":{
@@ -114,7 +108,7 @@
             },
             "SecurityGroups":[
                {
-                  "Ref":"EC2SecurityGroup"
+                  "Ref":"WebServerSecurityGroup"
                }
             ],
             "KeyName":{
@@ -144,7 +138,7 @@
                         "groupadd tomcat",
                         "useradd -M -s /bin/nologin -g tomcat -d /opt/tomcat tomcat",
                         "cd /tmp",
-                        "wget http://apache.mirrors.pair.com/tomcat/tomcat-8/v8.5.34/bin/apache-tomcat-8.5.34.tar.gz",
+                        "wget http://ftp.naz.com/pub/apache/tomcat/tomcat-8/v8.5.35/bin/apache-tomcat-8.5.35.tar.gz",
                         "mkdir /opt/tomcat",
                         "sudo tar xvf apache-tomcat-8*tar.gz -C /opt/tomcat --strip-components=1",
                         "cd /opt/tomcat",
@@ -301,6 +295,9 @@
                   "Ref":"SubnetId1"
                },
                {
+                  "Ref":"SubnetId2"
+                },
+               {
                   "Ref":"SubnetId3"
                }
             ],
@@ -355,6 +352,25 @@
             ]
          }
       },
+      "Listener2" : {
+        "Type" : "AWS::ElasticLoadBalancingV2::Listener",
+        "DependsOn":["ourTargetGroup","ourLoadBalancer"],
+        "Properties" : {
+
+          "DefaultActions" : [{
+            "Type" : "redirect",
+            "RedirectConfig" : {
+                "Port" : "443",
+                "Protocol" : "HTTPS",
+                "StatusCode" : "HTTP_301"
+            }
+          }],
+          "LoadBalancerArn" : { "Ref" : "ourLoadBalancer" },
+          "Port" : "8080",
+          "Protocol" : "HTTP"
+
+        }
+      },
       "ourTargetGroup":{
          "Type":"AWS::ElasticLoadBalancingV2::TargetGroup",
          "Properties":{
@@ -390,6 +406,9 @@
             "Scheme":"internet-facing",
             "IpAddressType":"ipv4",
             "Subnets":[
+                {  
+                  "Ref":"SubnetId1"
+                },
                {
                   "Ref":"SubnetId2"
                },
@@ -421,7 +440,7 @@
                   "IpProtocol":"tcp",
                   "FromPort":"443",
                   "ToPort":"443",
-                  "SourceSecurityGroupId" : { "Ref" : "EC2SecurityGroup" }
+                  "CidrIp" : "0.0.0.0/0"
                }
             ],
             "SecurityGroupEgress":[
@@ -429,13 +448,57 @@
                   "IpProtocol":"tcp",
                   "FromPort":"8080",
                   "ToPort":"8080",
-                  "DestinationSecurityGroupId":{
-                     "Ref":"EC2SecurityGroup"
-                  }
+                  "CidrIp" : "0.0.0.0/0"
                }
             ]
          }
       },
+
+      "WebServerSecurityGroup" : {
+        "Type" : "AWS::EC2::SecurityGroup",
+        "Properties" : {
+            "GroupName" : "csye6225-webapp",
+            "GroupDescription" : "Access to ports 22, 80 & 443",
+            "VpcId": {"Ref":"VpcId"},
+            "SecurityGroupIngress" : [ {
+                "IpProtocol" : "tcp",
+                "FromPort" : "22",
+                "ToPort" : "22",
+            "CidrIp" : "0.0.0.0/0" },
+            {
+                "IpProtocol" : "tcp",
+                "FromPort" : "80",
+                "ToPort" : "80",
+                "CidrIp" : "0.0.0.0/0" },
+            {
+                "IpProtocol" : "tcp",
+                "FromPort" : "443",
+                "ToPort" : "443",
+                "CidrIp" : "0.0.0.0/0"
+            },
+            {
+                "IpProtocol": "tcp",
+                "FromPort": "8080",
+                "ToPort": "8080",
+                "SourceSecurityGroupId" : { "Ref" : "ourLoadBalancerSecurityGroup" }
+            } ]
+        }
+    },
+    "DBEC2SecurityGroup": {
+        "Type": "AWS::EC2::SecurityGroup",
+        "Properties" : {
+            "GroupName": "csye6225-rds",
+            "GroupDescription": "Open database for access",
+            "SecurityGroupIngress" : [{
+                "IpProtocol" : "tcp",
+                "FromPort" : "3306",
+                "ToPort" : "3306",
+                "SourceSecurityGroupId" : { "Ref" : "WebServerSecurityGroup" }
+            }],
+            "VpcId": {"Ref":"VpcId"}
+        }
+    },
+
       "ourIAMInstanceProfile":{
          "Type":"AWS::IAM::InstanceProfile",
          "Properties":{
@@ -524,7 +587,7 @@
             },
             "VPCSecurityGroups":[
                {
-                  "Ref":"RDSSecurityGroup"
+                  "Ref":"DBEC2SecurityGroup"
                }
             ]
          }

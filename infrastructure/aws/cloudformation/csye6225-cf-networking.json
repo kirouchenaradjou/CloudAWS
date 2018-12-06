@@ -228,50 +228,6 @@
 					"Ref": "ourPublicRouteTable"
 				}
 			}
-		},
-		"WebServerSecurityGroup" : {
-			"Type" : "AWS::EC2::SecurityGroup",
-			"Properties" : {
-				"GroupName" : "csye6225-webapp",
-				"GroupDescription" : "Access to ports 22, 80 & 443",
-				"VpcId": {"Ref":"ourVPC"},
-				"SecurityGroupIngress" : [ {
-					"IpProtocol" : "tcp",
-					"FromPort" : "22",
-					"ToPort" : "22",
-				"CidrIp" : "0.0.0.0/0" },
-				{
-					"IpProtocol" : "tcp",
-					"FromPort" : "80",
-					"ToPort" : "80",
-				"CidrIp" : "0.0.0.0/0" },
-				{
-					"IpProtocol" : "tcp",
-					"FromPort" : "443",
-					"ToPort" : "443",
-					"CidrIp" : "0.0.0.0/0"
-				},
-				{
-					"IpProtocol": "tcp",
-					"FromPort": "8080",
-					"ToPort": "8080",
-					"CidrIp" : "0.0.0.0/0"
-				} ]
-			}
-		},
-		"DBEC2SecurityGroup": {
-			"Type": "AWS::EC2::SecurityGroup",
-			"Properties" : {
-				"GroupName": "csye6225-rds",
-				"GroupDescription": "Open database for access",
-				"SecurityGroupIngress" : [{
-					"IpProtocol" : "tcp",
-					"FromPort" : "3306",
-					"ToPort" : "3306",
-					"SourceSecurityGroupId" : { "Ref" : "WebServerSecurityGroup" }
-				}],
-				"VpcId": {"Ref":"ourVPC"}
-			}
 		}
 	}
 }
