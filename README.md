@@ -1,5 +1,5 @@
 # csye6225-fall2018
-# assignment09-10
+
 
 # Team Member Information:
 - Akilan Rajendiran         rajendiran.a@husky.neu.edu
@@ -22,7 +22,6 @@
 - There will be two profiles, the dev profile to run the application on your local machine and aws profile to run the application in   AWS using S3 bucket utility
 - Set the profile in the 'Edit Configurations' by mentioning the profile name in the active profile textbox.
 
-# How to run the APi
 # Run it via either Postman or AdvancedRestClient 
 Following are the 2 API's been supported :
 
